@@ -1,0 +1,202 @@
+[
+    {
+        "comment_id":"C001",
+        "username":"user_123",
+        "comment_text":"lucu banget videonya🤣",
+        "timestamp":"2025-06-16 10:05:23",
+        "likes":150,
+        "replies":12,
+        "video_topic":"komedi",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C002",
+        "username":"tiktok_fan",
+        "comment_text":"keren banget kak inspirasi nih!",
+        "timestamp":"2025-06-16 10:07:45",
+        "likes":88,
+        "replies":5,
+        "video_topic":"motivasi",
+        "sentimen":"positif"
+    },
+    {
+        "comment_id":"C003",
+        "username":"gemoy_cat",
+        "comment_text":"meoww gemesinnn bangettt!!!",
+        "timestamp":"2025-06-16 10:10:01",
+        "likes":300,
+        "replies":20,
+        "video_topic":"hewan peliharaan",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C004",
+        "username":"daily_vlog",
+        "comment_text":"next vlog kemana lagi kak?",
+        "timestamp":"2025-06-16 10:12:10",
+        "likes":45,
+        "replies":3,
+        "video_topic":"travel",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C005",
+        "username":"bucin_story",
+        "comment_text":"relate banget sama aku😭😭",
+        "timestamp":"2025-06-16 10:15:30",
+        "likes":210,
+        "replies":18,
+        "video_topic":"cerita pribadi",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C006",
+        "username":"foodie_lover",
+        "comment_text":"jadi laper deh liatnya resepnya dong!",
+        "timestamp":"2025-06-16 10:18:00",
+        "likes":112,
+        "replies":9,
+        "video_topic":"kuliner",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C007",
+        "username":"sporty_girl",
+        "comment_text":"keren banget gerakannya latihannya berapa lama?",
+        "timestamp":"2025-06-16 10:20:15",
+        "likes":75,
+        "replies":6,
+        "video_topic":"olahraga",
+        "sentimen":"positif"
+    },
+    {
+        "comment_id":"C008",
+        "username":"music_addict",
+        "comment_text":"lagunya bikin candu judulnya apa ya?",
+        "timestamp":"2025-06-16 10:22:30",
+        "likes":90,
+        "replies":7,
+        "video_topic":"musik",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C009",
+        "username":"fashionista",
+        "comment_text":"outfitnya kece badai kak!",
+        "timestamp":"2025-06-16 10:25:00",
+        "likes":180,
+        "replies":15,
+        "video_topic":"fashion",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C010",
+        "username":"gamer_indo",
+        "comment_text":"GGwp! main bareng yuk kak!",
+        "timestamp":"2025-06-16 10:27:10",
+        "likes":60,
+        "replies":4,
+        "video_topic":"game",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C011",
+        "username":"parenting_tip",
+        "comment_text":"makasih tipsnya kak sangat membantu!",
+        "timestamp":"2025-06-16 10:30:00",
+        "likes":130,
+        "replies":10,
+        "video_topic":"parenting",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C012",
+        "username":"student_life",
+        "comment_text":"tugasku numpuk gara-gara liat tiktok ini😭",
+        "timestamp":"2025-06-16 10:32:20",
+        "likes":55,
+        "replies":2,
+        "video_topic":"edukasi",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C013",
+        "username":"random_thoughts",
+        "comment_text":"hahaha bener juga sih",
+        "timestamp":"2025-06-16 10:35:05",
+        "likes":25,
+        "replies":1,
+        "video_topic":"komedi",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C014",
+        "username":"nature_lover",
+        "comment_text":"indah banget pemandangannya bikin adem",
+        "timestamp":"2025-06-16 10:37:30",
+        "likes":95,
+        "replies":8,
+        "video_topic":"alam",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C015",
+        "username":"art_enthusiast",
+        "comment_text":"karyanya luar biasa!",
+        "timestamp":"2025-06-16 10:40:00",
+        "likes":160,
+        "replies":11,
+        "video_topic":"seni",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C016",
+        "username":"tech_geek",
+        "comment_text":"spek PC-nya apa kak?",
+        "timestamp":"2025-06-16 10:42:15",
+        "likes":40,
+        "replies":3,
+        "video_topic":"teknologi",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C017",
+        "username":"health_guru",
+        "comment_text":"sehat selalu ya kak!",
+        "timestamp":"2025-06-16 10:45:00",
+        "likes":70,
+        "replies":5,
+        "video_topic":"kesehatan",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C018",
+        "username":"makeup_addict",
+        "comment_text":"tutorialnya jelas banget makasih!",
+        "timestamp":"2025-06-16 10:47:30",
+        "likes":105,
+        "replies":9,
+        "video_topic":"kecantikan",
+        "sentimen":"netral"
+    },
+    {
+        "comment_id":"C019",
+        "username":"car_enthusiast",
+        "comment_text":"wow mobilnya keren!",
+        "timestamp":"2025-06-16 10:50:00",
+        "likes":80,
+        "replies":6,
+        "video_topic":"otomotif",
+        "sentimen":"positif"
+    },
+    {
+        "comment_id":"C020",
+        "username":"DIY_expert",
+        "comment_text":"pengen coba bikin deh!",
+        "timestamp":"2025-06-16 10:52:10",
+        "likes":120,
+        "replies":10,
+        "video_topic":"DIY",
+        "sentimen":"netral"
+    }
+]
