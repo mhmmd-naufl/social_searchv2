@@ -1,0 +1,26 @@
+# Python venv
+venv/
+.venv/
+ENV/
+env/
+# VSCode settings
+.vscode/
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+# Mac OS
+.DS_Store
+# Windows
+Thumbs.db
+# Log files
+*.log
+# Environment variables
+.env
+.env.*
+# Test/report/output
+*.sqlite3
+*.db
