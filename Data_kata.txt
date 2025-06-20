@@ -1,0 +1,33 @@
+positive_keywords = [
+'baik', 'indah', 'bagus', 'sehat', 'bahagia', 'adil', 'tenang', 'tenteram', 
+'sukses', 'berhasil', 'mulia', 'luhur', 'cerdas', 'pandai', 'jujur', 'setia', 
+'senang', 'mujur', 'manis', 'enak', 'nikmat', 'patut', 'layak', 'sempurna', 
+'kuat', 'berani', 'lincah', 'cepat', 'rapi', 'bersih', 'murni', 'suci', 
+'damai', 'harmoni', 'modern', 'unggul', 'utama', 'terbaik', 'cemerlang', 
+'hebat', 'menyenangkan', 'membanggakan', 'memukau', 'menakjubkan', 'ramah', 
+'sopan', 'murah hati', 'dermawan', 'bijaksana', 'kreatif', 'inovatif', 
+'inspiratif', 'motivasi', 'optimis', 'ceria', 'gembira', 'antusias', 
+'dinamis', 'elegan', 'anggun', 'menawan', 'cantik', 'rupawan', 'elok', 
+'megah', 'mewah', 'berkilau', 'bercahaya', 'cerah', 'menyegarkan', 
+'menenangkan', 'nyaman', 'aman', 'stabil', 'makmur', 'sejahtera', 
+'beruntung', 'berkualitas', 'terpuji', 'terhormat', 'berwibawa', 'berprestasi', 
+'efektif', 'efisien', 'produktif', 'progresif', 'maju', 'berkembang', 
+'harmonis', 'damai', 'penuh kasih', 'sayang', 'peduli', 'empati', 
+'berbudi', 'luhur', 'agung', 'mengagumkan', 'fenomenal', 'luar biasa', 'spektakuler', 'memesona']
+    
+negative_keywords = [
+'buruk', 'jelek', 'sakit', 'sedih', 'cemas', 'khawatir', 'bodoh', 'tolol', 
+'malas', 'sial', 'celaka', 'rusak', 'hancur', 'miskin', 'kotor', 'kasar', 
+'jahat', 'kejam', 'sombong', 'congkak', 'lambat', 'lemah', 'cacat', 'gagal', 
+'parah', 'susah', 'sulit', 'kacau', 'berantakan', 'benci', 'dengki', 
+'marah', 'jengkel', 'putus asa', 'kurang', 'rendah', 'hina', 'malu', 
+'mengerikan', 'menyedihkan', 'menjijikkan', 'menakutkan', 'meresahkan', 
+'mengganggu', 'menyusahkan', 'berbahaya', 'mematikan', 'jahil', 'nakal', 
+'culas', 'curang', 'licik', 'khianat', 'pengkhianat', 'munafik', 'palsu', 
+'bohong', 'penipu', 'korupsi', 'busuk', 'lapuk', 'usang', 'kuno', 'terbelakang', 
+'terpuruk', 'menderita', 'sengsara', 'payah', 'lelet', 'kusam', 'suram', 
+'kelam', 'gelap', 'muram', 'lesu', 'letih', 'capek', 'lelah', 'bosan', 
+'jenuh', 'muak', 'risih', 'geram', 'kesal', 'sebal', 'dongkol', 'gregetan', 
+'sakit hati', 'kecewa', 'patah hati', 'putus harapan', 'terhina', 'tercela', 
+'terkutuk', 'terlantar', 'terabaikan', 'tersisih', 'termarginalkan', 
+'tertekan', 'terhambat', 'tertutup', 'terisolasi']
