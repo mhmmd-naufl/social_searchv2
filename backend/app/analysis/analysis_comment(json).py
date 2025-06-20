@@ -4,8 +4,7 @@ from nltk.corpus import stopwords
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import json
 
-# --- 1. Konfigurasi File Input dan Output ---
-INPUT_JSON_FILE = 'csvjson.json' # Ganti dengan nama file JSON Anda
+INPUT_JSON_FILE = 'csvjson.json'
 OUTPUT_JSON_FILE_LEXICON = 'komentar_tiktok_sentimen_output.json' # Nama file output untuk hasil sentimen (JSON)
 KOMENTAR_KEY_IN_JSON = 'comment_text' # <--- PENTING: Ganti dengan nama key yang berisi komentar di JSON Anda
 
@@ -38,20 +37,33 @@ def preprocess_text(text):
 lexicon = {
     'bagus': 1, 'baik': 1, 'suka': 1, 'senang': 1, 'cinta': 1, 'hebat': 1, 'mantap': 1,
     'keren': 1, 'luar_biasa': 1, 'top': 1, 'asik': 1, 'menarik': 1, 'positif': 1,
+    'inspiratif': 1, 'menghibur': 1, 'mendidik': 1, 'setuju': 1, 'asli': 1, 'lanjut': 1,
+    'kocak': 1, 'lucu': 1, 'ngakak': 1, 'respect': 1, 'salut': 1, 'legend': 1,
+    'jenius': 1, 'kreatif': 1, 'relate': 1, 'idola': 1, 'bagus_banget': 1,
+    'terbaik': 1, 'terharu': 1, 'niat': 1, 'ramah': 1, 'bijak': 1, 'bermanfaat': 1,
+    'cocok': 1, 'jujur': 1, 'rapih': 1, 'estetik': 1, 'wow': 1, 'cakep': 1, 'good': 1,
+    'sip': 1, 'oke': 1, 'ya': 1, 'boleh': 1, 'mungkin': 1, 'santai': 1, 'goks': 1,
+    'gaskeun': 1, 'auto': 1, 'semangat': 1, 'pejuang': 1, 'nice' : 1,
+    '❤️': 1, '😍': 1, '🥰': 1, '🔥': 1, '👏': 1, '👍': 1, '💪': 1, '😁': 1, '🤩': 1,
+
     'jelek': -1, 'buruk': -1, 'benci': -1, 'kesal': -1, 'marah': -1, 'kecewa': -1,
     'parah': -1, 'rugi': -1, 'tidak_suka': -1, 'negatif': -1, 'sampah': -1,
-    'biasa': 0, 'lumayan': 0, 'cukup': 0, 'ok': 0, 'standar': 0, 'normal': 0,
-    'inspiratif': 1, 'menghibur': 1, 'mendidik': 1, 'mutu': 0, 'emosi': -1,
-    'greget': 0, 'setuju': 1, 'spesial': 0, 'kecewa': -1, 'asli': 1, 'nyesel': -1,
-    'sakit': -1, 'mata': 0, 'biasa': 0, 'jiwa': 0, 'lanjut': 1
+    'nyesel': -1, 'lebay': -1, 'alay': -1, 'lebai': -1, 'cringe': -1,
+    'gagal': -1, 'sakit': -1, 'toxic': -1, 'capek': -1, 'malas': -1,
+    'basi': -1, 'ngaco': -1, 'aneh': -1, 'serem': -1, 'pelit': -1,
+    'curang': -1, 'fake': -1, 'palsu': -1, 'anjing': -1, 'provokatif': -1,
+    'males': -1, 'skip': -1, 'garing': -1, 'emosi': -1, 'bangsat': -1,
+    'kampret': -1, 'tolol': -1, 'bodoh': -1, 'goblok': -1, 'kampungan': -1,
+    'ngeselin': -1, 'menjijikkan': -1, 'nolep': -1, 'julid': -1,
+    'ngedumel': -1, 'menyeramkan': -1,
+    '💩': -1, '😡': -1, '👎': -1, '😠': -1, '🤮': -1,
 } 
 
 def analyze_sentiment_lexicon(text_tokens, lexicon):
     score = 0
     for token in text_tokens:
-        score += lexicon.get(token, 0) # Tambahkan skor kata, jika tidak ada di leksikon, skor 0
+        score += lexicon.get(token, 0)
     
-    # Klasifikasi sentimen berdasarkan skor total
     if score > 0:
         return 'positif'
     elif score < 0:
@@ -59,7 +71,6 @@ def analyze_sentiment_lexicon(text_tokens, lexicon):
     else:
         return 'netral'
 
-# --- 4. Memuat Data dari JSON ---
 try:
     with open(INPUT_JSON_FILE, 'r', encoding='utf-8') as f:
         data_json = json.load(f)
@@ -67,14 +78,10 @@ try:
     print(f"Berhasil memuat '{INPUT_JSON_FILE}'.")
     print(f"Jumlah entri awal: {len(data_json)}")
 
-    # Konversi data JSON ke DataFrame pandas
-    # Pastikan data yang diekstrak adalah string
     comments_data = []
     for item in data_json:
         if KOMENTAR_KEY_IN_JSON in item and isinstance(item[KOMENTAR_KEY_IN_JSON], str):
-            # Tambahkan semua key-value pair dari item asli, lalu tambahkan sentimen nanti
-            # Ini akan menjaga struktur asli JSON sejauh mungkin
-            row_data = item.copy() # Salin item asli
+            row_data = item.copy()
             comments_data.append(row_data)
     
     df_komentar = pd.DataFrame(comments_data)
@@ -82,13 +89,11 @@ try:
     if df_komentar.empty:
         raise ValueError(f"Tidak ada komentar yang ditemukan pada kunci '{KOMENTAR_KEY_IN_JSON}' atau data kosong setelah filter.")
 
-    # Pastikan kolom komentar yang akan diproses adalah string
     df_komentar[KOMENTAR_KEY_IN_JSON] = df_komentar[KOMENTAR_KEY_IN_JSON].astype(str)
     df_komentar.dropna(subset=[KOMENTAR_KEY_IN_JSON], inplace=True)
     df_komentar.reset_index(drop=True, inplace=True)
     print(f"Jumlah komentar setelah memfilter dan menghapus nilai kosong: {len(df_komentar)}")
 
-    # Pra-pemrosesan komentar dan simpan sebagai list token
     print("Memulai pra-pemrosesan teks...")
     df_komentar['komentar_tokenized'] = df_komentar[KOMENTAR_KEY_IN_JSON].apply(preprocess_text)
     print("Pra-pemrosesan teks selesai.")
