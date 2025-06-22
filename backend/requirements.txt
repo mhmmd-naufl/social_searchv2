@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pymongo
+selenium
+requests
+nltk
+sastrawi
+
+python-dotenv

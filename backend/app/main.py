@@ -2,8 +2,17 @@ from fastapi import FastAPI, HTTPException
 from scrapper import search_video
 from pymongo import MongoClient
 from bson import ObjectId
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # atau ganti dengan ['http://localhost:3000'] jika frontend di port 3000
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def fix_objectid(data):
     if isinstance(data, list):
@@ -15,8 +24,8 @@ def fix_objectid(data):
 
 MONGO_URI = "mongodb://localhost:27017"
 client = MongoClient(MONGO_URI)
-db = client["tiktok_db"]
-collection = db["search_results"]
+db = client["new_tiktok_db"]
+collection = db["videos"]
 
 def check_keyword_in_db(keyword: str) -> bool:
     try:

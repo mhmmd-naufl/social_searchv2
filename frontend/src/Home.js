@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { FaCalendarAlt, FaClock, FaTemperatureHigh, FaBars } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { FaCalendarAlt, FaClock, FaTemperatureHigh, FaBars } from "react-icons/fa";
 import "./Home.css";
 
-function App() {
+function Home() {
   const [keyword, setKeyword] = useState("");
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [temp, setTemp] = useState("...");
-  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  // Update waktu dan tanggal
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -32,47 +31,39 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch suhu cuaca
   useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const city = "Banyuwangi";
-        const apiKey = "39699f61db3b4088483dff28ef6f48ab";
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
-        );
-        const data = await response.json();
-        const temperature = data.main.temp;
-        setTemp(`${temperature.toFixed(1)}°C`);
-      } catch (error) {
-        console.error("Gagal mengambil suhu:", error);
-        setTemp("Gagal");
-      }
-    };
+  const fetchWeather = async () => {
+  try {
+    const city = "Banyuwangi";
+    const apiKey = "39699f61db3b4088483dff28ef6f48ab";
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+    );
+    const data = await response.json();
+    const temperature = data.main.temp;
+    setTemp(`${temperature.toFixed(1)}°C`);
+  } catch (error) {
+    console.error("Gagal mengambil suhu:", error);
+    setTemp("Gagal");
+  }
+};
+
 
     fetchWeather();
   }, []);
 
-  // Ambil history dari localStorage
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("searchHistory") || "[]");
     setHistory(stored);
   }, []);
 
-  // Fungsi pencarian
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (keyword.trim()) {
-      setLoading(true);
       const updatedHistory = [keyword, ...history.filter((k) => k !== keyword)].slice(0, 5);
       localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
       setHistory(updatedHistory);
+     navigate(`/hasil?keyword=${encodeURIComponent(keyword)}`);
 
-      // Simpan keyword ke sessionStorage agar bisa diakses di Hasil.js
-      sessionStorage.setItem("lastKeyword", keyword);
-
-      // Redirect ke halaman hasil
-      navigate("/hasil");
-      setLoading(false);
     }
   };
 
@@ -89,7 +80,9 @@ function App() {
     <>
       <div className="main">
         <div className="top-bar">
-          <div className="title">Social Search</div>
+          <div className="title">Social Search🔍</div>
+
+          {/* Wrap FaBars dan Dropdown dalam container */}
           <div className="history-container">
             <FaBars className="history-icon" onClick={toggleHistory} />
             {showHistory && (
@@ -97,6 +90,7 @@ function App() {
                 {history.length === 0 ? (
                   <div className="history-item empty">Belum ada history</div>
                 ) : (
+
                   history.map((item, idx) => (
                     <div key={idx} className="history-item" onClick={() => handleHistoryClick(item)}>
                       {item}
@@ -110,20 +104,20 @@ function App() {
 
         <div className="search-bar">
           <div className="search-container"></div>
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleSearch();
-              }
-            }}
-            placeholder="Cari konten TikTok"
-            className="search-input"
-          />
-          <button onClick={handleSearch} className="search-button" disabled={loading}>
-            {loading ? "Loading..." : "Cari"}
+<input
+  type="text"
+  value={keyword}
+  onChange={(e) => setKeyword(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  }}
+  placeholder="Cari konten TikTok"
+  className="search-input"
+/>
+          <button onClick={handleSearch} className="search-button">
+            Cari
           </button>
         </div>
       </div>
@@ -143,4 +137,4 @@ function App() {
   );
 }
 
-export default App;
+export default Home;
