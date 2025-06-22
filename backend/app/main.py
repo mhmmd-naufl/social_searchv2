@@ -3,11 +3,6 @@ from scrapper import search_video
 from pymongo import MongoClient
 from bson import ObjectId
 
-# if __name__ == "__main__":  
-#     print("Memulai...")
-#     search_video("banyuwangi")
-#     print("\nselesai.")
-    
 app = FastAPI()
 
 def fix_objectid(data):
@@ -17,10 +12,6 @@ def fix_objectid(data):
         return {k: str(v) if isinstance(v, ObjectId) else fix_objectid(v) for k, v in data.items()}
     else:
         return data
-
-@app.get("/")
-def read_root():
-    return {"message": "Hello from FastAPI!"}
 
 MONGO_URI = "mongodb://localhost:27017"
 client = MongoClient(MONGO_URI)
@@ -35,18 +26,28 @@ def check_keyword_in_db(keyword: str) -> bool:
         print(f"Database error: {e}")
         return False
 
+@app.get("/")
+def read_root():
+    return {"message": "Hello from FastAPI!"}
+
 @app.get("/search")
 async def search(keyword: str):
     if not keyword:
         raise HTTPException(status_code=400, detail="Keyword is required")
 
+    # Cek apakah keyword sudah ada di database
     if check_keyword_in_db(keyword):
-        return {"message": f"Keyword '{keyword}' found in database"}
+        data = list(collection.find({"keyword": keyword}))
+        data = fix_objectid(data)
+        return {"status": "success", "data": data}
     else:
         try:
+            # Jika tidak ada, jalankan scrapper
             result = search_video(keyword)
             if result:
                 result = fix_objectid(result)
                 return {"status": "success", "data": result}
+            else:
+                raise HTTPException(status_code=404, detail="No data found")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Scrapper failed: {str(e)}")
