@@ -1,23 +1,26 @@
+import json
+import bson
 import time
 import random
-import json
+from analysis.analysis_comment import analyze_comments_from_data, lexicon
 from urllib.parse import quote_plus
 from cookies import cookie
 from selenium_driver import setup_selenium_driver
 from add_cookie import add_cookies_to_driver
 from save import save_to_mongo
+from scrapper_comment import cek
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 
-def search_video(keyword, max_scroll=5):
+def search_video(keyword, max_scroll=0):
     url = f"https://www.tiktok.com/search?q={quote_plus(keyword)}"
     cookies_str = cookie
     enable_scroll = True
     scroll_delay = 3
     css_selector = 'div[data-e2e="search_top-item"]'
-    final_result = []
+    video_details = []
     
     driver = None
     try:
@@ -52,12 +55,13 @@ def search_video(keyword, max_scroll=5):
             print("Selesai melakukan scroll.")
 
         elements = driver.find_elements(By.CSS_SELECTOR, css_selector)
+        print(f"Jumlah video ditemukan: {len(elements)}")
         
         if elements:
             for i, element in enumerate(elements):
                 try:
-                    raw_html = element.get_attribute('outerHTML')
-                    print(raw_html)
+                    # raw_html = element.get_attribute('outerHTML')
+                    # print(raw_html)
                     try:
                         img_elem = element.find_element(By.CSS_SELECTOR, 'img[alt]')
                         desc = img_elem.get_attribute('alt').strip()
@@ -94,13 +98,31 @@ def search_video(keyword, max_scroll=5):
                         "keyword" : keyword
                     }
                     
-                    final_result.append(data)
+                    video_details.append(data)
                     
-                    save_to_mongo(data)
                 except Exception as e:
-                    print(f"Gagal mengambil detail elemen: {e}")
-                    driver.save_screenshot("error_screenshot_detail.png")
-                    print("Screenshot error disimpan sebagai 'error_screenshot_detail.png'.")
+                    print(f"Error mengambil data video ke-{i+1}: {e}")
+                    continue
+                    
+        final_result = []
+        for data in video_details:
+            try:
+                comments = cek(driver, data)
+                data["comment"] = comments
+                final_result.append(data)
+            except Exception as e:
+                print(f"Gagal scraping komentar untuk video {data['video_id']}: {e}")
+        
+        final_result = analyze_comments_from_data(final_result, lexicon)
+                
+        with open('final_results.json', 'w', encoding='utf-8') as f:
+            json.dump(final_result, f, ensure_ascii=False, indent=4)
+            
+        for data in final_result:
+            print(data)
+            save_to_mongo(data)
+        
+
 
     except TimeoutException:
         print(f"Timeout: Halaman tidak dimuat atau elemen tidak muncul sama sekali di '{url}' dalam batas waktu.")
@@ -116,9 +138,6 @@ def search_video(keyword, max_scroll=5):
             driver.quit()
     
     return final_result
-            
-    # with open('results.json', 'w', encoding='utf-8') as f:
-    #     json.dump(final_result, f, ensure_ascii=False, indent=4)
     
 if __name__ == "__main__":  
     print("Memulai...")
