@@ -1,0 +1,134 @@
+/* Reset & base */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #fff;
+  color: #333;
+}
+
+/* Header */
+.site-header {
+  background-color: #2C3E50;
+  color: white;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 1000;
+  box-sizing: border-box;
+  border-bottom: 3px solid #5E5A80;
+  margin: 0;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 1.8em;
+  font-weight: bold;
+}
+
+/* Container */
+.detail-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: white;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+/* Content */
+.content {
+  padding: 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  margin-right: 10px;
+  color: #333;
+}
+
+.nickname {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.sort-options {
+  margin: 20px 0;
+}
+
+.sort-options select {
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.desc {
+  font-style: italic;
+  color: #444;
+  margin: 1rem 0;
+}
+
+/* Sentiment Summary */
+.sentiment-summary {
+  margin-top: 1rem;
+}
+
+.sentiment-summary ul {
+  list-style-type: disc;
+  margin-left: 20px;
+  padding: 0;
+}
+
+/* Komentar */
+.comment-box {
+  margin-top: 1.5rem;
+}
+
+.comment-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 0.5rem 1rem;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border-left: 6px solid #ccc;
+}
+
+.comment-item.positif {
+  border-left-color: #4caf50;
+}
+
+.comment-item.negatif {
+  border-left-color: #f44336;
+}
+
+.sentiment-label {
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.sentiment-label.positif {
+  color: #4caf50;
+}
+
+.sentiment-label.negatif {
+  color: #f44336;
+}
+
+/* Footer */
+.site-footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: #f0f0f0;
+  font-size: 0.9rem;
+  margin-top: 2rem;
+}
