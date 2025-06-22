@@ -36,7 +36,7 @@ lexicon = {
     'efektif': 1, 'efisien': 1, 'produktif': 1, 'progresif': 1, 'maju': 1, 'berkembang': 1, 
     'harmonis': 1, 'damai': 1, 'penuh kasih': 1, 'sayang': 1, 'peduli': 1, 'empati': 1, 
     'berbudi': 1, 'luhur': 1, 'agung': 1, 'mengagumkan': 1, 'fenomenal': 1, 'luar biasa': 1, 'spektakuler': 1, 'memesona': 1,
-    '🤣': 1, '😂': 1, '😭': 1, '🥰': 1, 
+    '🤣': 1, '😂': 1, '😭': 1, '🥰': 1, 'semangat': 1, 
     
     # negative words
     'sakit': -1, 'sedih': -1, 'cemas': -1, 'khawatir': -1, 'bodoh': -1, 'tolol': -1, 
@@ -74,21 +74,15 @@ def analyze_sentiment_lexicon(text_tokens, lexicon):
 
 # --- 3. Analisis Sentimen Komentar dari Data Scrapper ---
 def analyze_comments_from_data(data, lexicon):
-    """
-    data: list of dict hasil scrapper.py, setiap dict ada key 'comment' (list of string)
-    lexicon: dict kata dasar -> skor sentimen
-    """
-    for video in data:
-        analyzed_comments = []
-        for comment in video.get("comment", []):
-            tokens = preprocess_text(comment)
-            sentiment = analyze_sentiment_lexicon(tokens, lexicon)
-            analyzed_comments.append({
-                "text": comment,
-                "sentiment": sentiment
-            })
-        video["comment_analyzed"] = analyzed_comments
-    return data
+    analyzed_comments = []
+    for comment in data:
+        tokens = preprocess_text(comment)
+        sentiment = analyze_sentiment_lexicon(tokens, lexicon)
+        analyzed_comments.append({
+            "text": comment,
+            "sentiment": sentiment
+        })
+    return analyzed_comments
 
 # --- 4. Contoh Penggunaan Mandiri ---
 # if __name__ == "__main__":

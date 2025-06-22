@@ -97,32 +97,27 @@ def search_video(keyword, max_scroll=0):
                         "video_id": video_id,
                         "keyword" : keyword
                     }
-                    
+
                     video_details.append(data)
                     
                 except Exception as e:
                     print(f"Error mengambil data video ke-{i+1}: {e}")
                     continue
-                    
+
         final_result = []
         for data in video_details:
             try:
-                comments = cek(driver, data)
-                data["comment"] = comments
+                analyzed_comments = cek(driver, data)
+                data["comment_analyzed"] = analyzed_comments
                 final_result.append(data)
             except Exception as e:
                 print(f"Gagal scraping komentar untuk video {data['video_id']}: {e}")
-        
-        final_result = analyze_comments_from_data(final_result, lexicon)
-                
+
         with open('final_results.json', 'w', encoding='utf-8') as f:
             json.dump(final_result, f, ensure_ascii=False, indent=4)
-            
-        for data in final_result:
-            print(data)
-            save_to_mongo(data)
-        
 
+        for data in final_result:
+            save_to_mongo(data)
 
     except TimeoutException:
         print(f"Timeout: Halaman tidak dimuat atau elemen tidak muncul sama sekali di '{url}' dalam batas waktu.")
@@ -132,11 +127,13 @@ def search_video(keyword, max_scroll=0):
         print(f"Terjadi kesalahan tak terduga: {e}")
         driver.save_screenshot("error_screenshot_page.png")
         print("Screenshot error disimpan sebagai 'error_screenshot_page.png'.")
-        
+
     finally:
-        if driver:
+        try:
             driver.quit()
-    
+        except:
+            pass
+
     return final_result
     
 if __name__ == "__main__":  
