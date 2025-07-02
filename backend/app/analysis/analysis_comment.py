@@ -83,23 +83,3 @@ def analyze_comments_from_data(data, lexicon):
             "sentiment": sentiment
         })
     return analyzed_comments
-
-# --- 4. Contoh Penggunaan Mandiri ---
-# if __name__ == "__main__":
-#     # Contoh data hasil scrapper
-#     final_result = [
-#         {
-#             "desc": "Contoh desc",
-#             "author": "user1",
-#             "video_link": "https://tiktok.com/@user1/video/123",
-#             "video_id": "123",
-#             "keyword": "banyuwangi",
-#             "comment": [
-#                 "Infoin kafe Banyuwangi kota yg 24 jam dongg",
-#                 "kenapa klo bagus jauh dari kota 😌"
-#             ]
-#         }
-#     ]
-#     hasil = analyze_comments_from_data(final_result, lexicon)
-#     import json
-#     print(json.dumps(hasil, ensure_ascii=False, indent=2))

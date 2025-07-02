@@ -61,6 +61,7 @@ body {
   font-size: 1.2em;
   font-weight: bold;
 }
+
 .sort-options {
   margin: 20px 0;
 }
@@ -87,6 +88,25 @@ body {
   padding: 0;
 }
 
+/* Pie Chart */
+.pie-chart-box {
+  width: 320px;
+  max-width: 100%;
+  height: 260px;
+  margin: 24px auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 16px 8px 8px 8px;
+  box-sizing: border-box;
+}
+.pie-chart-box canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 260px !important;
+  display: block;
+}
+
 /* Komentar */
 .comment-box {
   margin-top: 1.5rem;
@@ -111,6 +131,10 @@ body {
   border-left-color: #f44336;
 }
 
+.comment-item.netral {
+  border-left-color: #888;
+}
+
 .sentiment-label {
   font-weight: bold;
   font-size: 0.85rem;
@@ -124,6 +148,10 @@ body {
   color: #f44336;
 }
 
+.sentiment-label.netral {
+  color: #888;
+}
+
 /* Footer */
 .site-footer {
   text-align: center;
@@ -131,4 +159,22 @@ body {
   background-color: #f0f0f0;
   font-size: 0.9rem;
   margin-top: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .detail-container {
+    padding: 5px;
+    max-width: 100vw;
+    border-radius: 0;
+  }
+  .content {
+    padding: 0.5rem;
+  }
+  .pie-chart-box {
+    max-width: 100vw;
+    width: 100vw;
+    height: 220px;
+    padding: 8px 2px 2px 2px;
+  }
 }
