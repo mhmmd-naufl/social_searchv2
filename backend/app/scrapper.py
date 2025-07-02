@@ -60,8 +60,6 @@ def search_video(keyword, max_scroll=0):
         if elements:
             for i, element in enumerate(elements):
                 try:
-                    # raw_html = element.get_attribute('outerHTML')
-                    # print(raw_html)
                     try:
                         img_elem = element.find_element(By.CSS_SELECTOR, 'img[alt]')
                         desc = img_elem.get_attribute('alt').strip()

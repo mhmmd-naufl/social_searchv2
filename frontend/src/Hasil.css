@@ -197,6 +197,21 @@ body {
   color: #888;
 }
 
+.detail-btn {
+  margin-top: 12px;
+  padding: 6px 18px;
+  border-radius: 6px;
+  border: none;
+  background: #343a40;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.detail-btn:hover {
+  background: #222;
+}
+
 /* Responsive */
 @media (max-width: 800px) {
   .card-content {

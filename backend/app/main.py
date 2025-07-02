@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from scrapper import search_video
 from pymongo import MongoClient
 from bson import ObjectId
@@ -60,3 +60,9 @@ async def search(keyword: str):
                 raise HTTPException(status_code=404, detail="No data found")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Scrapper failed: {str(e)}")
+        
+@app.get("/video")
+async def get_video(video_id: str = Query(...)):
+    data = list(collection.find({"video_id": video_id}))
+    data = fix_objectid(data)
+    return {"status": "success", "data": data}

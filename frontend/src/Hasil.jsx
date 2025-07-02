@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Hasil.css";
 
 const Hasil = () => {
@@ -7,6 +7,7 @@ const Hasil = () => {
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const lastKeyword = sessionStorage.getItem("lastKeyword") || "";
@@ -29,6 +30,13 @@ const Hasil = () => {
     }
   }, []);
 
+  // Fungsi untuk ke halaman detail
+  const handleDetail = (item) => {
+    // Simpan data video ke sessionStorage agar bisa diakses di Detail.js
+    sessionStorage.setItem("detailVideo", JSON.stringify(item));
+    navigate(`/detail/${item.video_id}`);
+  };
+
   return (
     <>
       <header className="site-header">
@@ -46,7 +54,6 @@ const Hasil = () => {
 
         <div className="result-list">
           {results.map((item) => {
-            // Hitung statistik sentimen
             const total = item.comment_analyzed ? item.comment_analyzed.length : 0;
             const positif = item.comment_analyzed
               ? item.comment_analyzed.filter((c) => c.sentiment === "positif").length
@@ -70,8 +77,13 @@ const Hasil = () => {
             } else if (negatif >= positif && negatif >= netral) {
               mainSentiment = "negatif";
             } else if (netral >= positif && netral >= negatif) {
-            mainSentiment = "netral";
+              mainSentiment = "netral";
             }
+
+            // Ambil maksimal 5 komentar
+            const commentsToShow = item.comment_analyzed
+              ? item.comment_analyzed.slice(0, 5)
+              : [];
 
             return (
               <div
@@ -92,8 +104,12 @@ const Hasil = () => {
                     </p>
                     <p className="komentar-label">💬 Komentar & Sentimen</p>
                     <ul className="comment-list">
-                      {item.comment_analyzed &&
-                        item.comment_analyzed.map((comment, idx) => (
+                      {commentsToShow.length === 0 ? (
+                        <li className="comment-item netral" style={{ color: "#888" }}>
+                          komentar kosong / komentar tidak termuat
+                        </li>
+                      ) : (
+                        commentsToShow.map((comment, idx) => (
                           <li key={idx} className={`comment-item ${comment.sentiment}`}>
                             "{comment.text}"{" "}
                             <span
@@ -110,8 +126,25 @@ const Hasil = () => {
                               ({comment.sentiment})
                             </span>
                           </li>
-                        ))}
+                        ))
+                      )}
                     </ul>
+                    <button
+                      className="detail-btn"
+                      onClick={() => handleDetail(item)}
+                      style={{
+                        marginTop: "12px",
+                        padding: "6px 18px",
+                        borderRadius: "6px",
+                        border: "none",
+                        background: "#343a40",
+                        color: "#fff",
+                        cursor: "pointer",
+                        fontWeight: "bold"
+                      }}
+                    >
+                      Lihat Detail
+                    </button>
                   </div>
                   <div className="card-right">
                     <h2 className="sentimen-title">{mainSentiment.toUpperCase()}</h2>
