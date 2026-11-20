@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import jobs
 from .config import CORS_ORIGINS
-from .database import ensure_indexes, videos
+from .database import ensure_indexes, find_documents
 from .scrapper import search_video
 
 logging.basicConfig(
@@ -53,7 +53,7 @@ def run_search_job(job_id: str, keyword: str) -> None:
     """Dijalankan BackgroundTasks, terpisah dari request HTTP."""
     jobs.set_running(job_id)
     try:
-        cached = list(videos.find({"keyword": keyword}))
+        cached = find_documents({"keyword": keyword})
         if cached:
             data, source = fix_objectid(cached), "cache"
         else:
@@ -109,7 +109,7 @@ def search(keyword: str = Query(..., min_length=1)):
         raise HTTPException(status_code=400, detail="Keyword is required")
 
     try:
-        cached = list(videos.find({"keyword": keyword}))
+        cached = find_documents({"keyword": keyword})
         if cached:
             return {"status": "success", "data": fix_objectid(cached), "source": "cache"}
 
@@ -127,5 +127,5 @@ def search(keyword: str = Query(..., min_length=1)):
 
 @app.get("/video")
 def get_video(video_id: str = Query(...)):
-    data = list(videos.find({"video_id": video_id}))
+    data = find_documents({"video_id": video_id})
     return {"status": "success", "data": fix_objectid(data)}

@@ -1,5 +1,5 @@
-# Ganti nama app dengan nama unik Anda sebelum deploy.
-app = "social-search-naufal"
+# Nama ini harus sama dengan app Fly yang sudah di-deploy.
+app = "social-searchv2"
 
 primary_region = "sin"
 

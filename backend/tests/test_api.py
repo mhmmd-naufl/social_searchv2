@@ -1,7 +1,5 @@
 """Tes endpoint API tanpa memanggil Selenium atau MongoDB sungguhan."""
 
-from unittest.mock import MagicMock
-
 import pytest
 from bson import ObjectId
 from fastapi.testclient import TestClient
@@ -26,9 +24,10 @@ def test_root():
 
 
 def test_search_membuat_job_dan_mengembalikan_hasil(monkeypatch):
-    videos = MagicMock()
-    videos.find.return_value = [{"video_id": "v1", "keyword": "bwi"}]
-    monkeypatch.setattr("app.main.videos", videos)
+    monkeypatch.setattr(
+        "app.main.find_documents",
+        lambda query: [{"video_id": "v1", "keyword": "bwi"}],
+    )
 
     response = client.post("/search", params={"keyword": "bwi"})
     assert response.status_code == 200
@@ -42,8 +41,7 @@ def test_search_membuat_job_dan_mengembalikan_hasil(monkeypatch):
     assert status["data"][0]["video_id"] == "v1"
 
 
-def test_search_menggunakan_job_aktif_yang_sama(monkeypatch):
-    monkeypatch.setattr("app.main.videos", MagicMock())
+def test_search_menggunakan_job_aktif_yang_sama():
     active = jobs.create_job("bwi")
 
     body = client.post("/search", params={"keyword": "bwi"}).json()
@@ -58,11 +56,10 @@ def test_status_job_tidak_ditemukan():
 
 
 def test_get_video_mengubah_objectid(monkeypatch):
-    videos = MagicMock()
-    videos.find.return_value = [
-        {"_id": ObjectId(), "video_id": "v1", "keyword": "bwi"}
-    ]
-    monkeypatch.setattr("app.main.videos", videos)
+    monkeypatch.setattr(
+        "app.main.find_documents",
+        lambda query: [{"_id": ObjectId(), "video_id": "v1", "keyword": "bwi"}],
+    )
 
     response = client.get("/video", params={"video_id": "v1"})
     assert response.status_code == 200

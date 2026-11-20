@@ -212,7 +212,7 @@ fly secrets set CORS_ORIGINS="https://domain-baru.vercel.app"
 
 | Gejala | Penyebab | Solusi |
 |---|---|---|
-| Hasil kosong | Database belum di-seed | Jalankan `python seed_demo.py` |
+| Hasil kosong | Database belum di-seed atau file demo tidak ikut build | Jalankan `python seed_demo.py`; cek `COPY backend/demo/` di `Dockerfile.fly` |
 | Error CORS di browser | `CORS_ORIGINS` belum/salah | `fly secrets set CORS_ORIGINS="https://xxx.vercel.app"` (tanpa `/` di akhir) |
 | `ServerSelectionTimeoutError` | IP Atlas belum diizinkan / password salah | Network Access `0.0.0.0/0`, cek user |
 | 404 saat refresh `/hasil` | Routing SPA belum benar | Pastikan `frontend/vercel.json` ikut ter-deploy |

@@ -41,6 +41,13 @@ Banner kecil di halaman hasil akan muncul jika environment variable `VITE_DEMO_M
    ```
 5. Deploy ulang Fly/Vercel jika diperlukan.
 
+## Fallback otomatis
+
+Jika koneksi MongoDB gagal (misalnya masalah TLS di lingkungan cloud), API
+otomatis memakai `backend/demo/sample_videos.json` yang sudah ikut ter-build
+dalam container. Perilaku ini dicatat di log server. Tampilan web juga
+menampilkan banner "Mode demo" ketika `VITE_DEMO_MODE=1`.
+
 ## Batasan teknis
 
 - Scraper bergantung pada selector `data-e2e` TikTok yang bisa berubah kapan saja.

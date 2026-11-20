@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HEADLESS=1
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends chromium chromium-driver \
+ && apt-get install -y --no-install-recommends chromium chromium-driver ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
  && python -c "import nltk; nltk.download('stopwords', quiet=True)"
 
 COPY backend/app/ ./app/
+COPY backend/demo/ ./demo/
 
 EXPOSE 8080
 CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
