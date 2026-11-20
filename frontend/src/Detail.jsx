@@ -1,12 +1,31 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { Pie } from "react-chartjs-2";
-import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
+import {
+  Chart,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import {
+  FaSearch,
+  FaArrowLeft,
+  FaExternalLinkAlt,
+  FaCalendarAlt,
+  FaCommentDots,
+} from "react-icons/fa";
 import "./Detail.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 Chart.register(ArcElement, Tooltip, Legend);
+
+const FILTERS = [
+  { value: "terbaru", label: "Semua" },
+  { value: "positif", label: "Positif" },
+  { value: "negatif", label: "Negatif" },
+  { value: "netral", label: "Netral" },
+];
 
 function Detail() {
   const navigate = useNavigate();
@@ -19,9 +38,9 @@ function Detail() {
   useEffect(() => {
     setLoading(true);
     fetch(`${API_URL}/video?video_id=${video_id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
       })
       .then((data) => {
         setVideo(Array.isArray(data.data) ? data.data[0] : data.data);
@@ -30,7 +49,6 @@ function Detail() {
       .catch(() => setLoading(false));
   }, [video_id]);
 
-  // Memoize comments agar tidak trigger warning eslint
   const comments = useMemo(
     () => (video && video.comment_analyzed ? video.comment_analyzed : []),
     [video]
@@ -40,9 +58,15 @@ function Detail() {
   const negatif = comments.filter((c) => c.sentiment === "negatif").length;
   const netral = comments.filter((c) => c.sentiment === "netral").length;
   const total = comments.length;
-  const percentPos = total ? ((positif / total) * 100).toFixed(0) : 0;
-  const percentNeg = total ? ((negatif / total) * 100).toFixed(0) : 0;
-  const percentNet = total ? ((netral / total) * 100).toFixed(0) : 0;
+  const percentPos = total ? Math.round((positif / total) * 100) : 0;
+  const percentNeg = total ? Math.round((negatif / total) * 100) : 0;
+  const percentNet = total ? Math.round((netral / total) * 100) : 0;
+
+  let dominant = "netral";
+  if (total > 0) {
+    if (positif >= negatif && positif >= netral) dominant = "positif";
+    else if (negatif >= positif && negatif >= netral) dominant = "negatif";
+  }
 
   const pieData = useMemo(
     () => ({
@@ -50,99 +74,214 @@ function Detail() {
       datasets: [
         {
           data: [positif, negatif, netral],
-          backgroundColor: ["#4caf50", "#f44336", "#888"],
-          borderWidth: 1,
+          backgroundColor: ["#16a34a", "#dc2626", "#64748b"],
+          borderWidth: 0,
+          hoverOffset: 4,
         },
       ],
     }),
     [positif, negatif, netral]
   );
 
-  const sortedComments = useMemo(() => {
-    if (sortType === "terbaru") {
-      // Data komentar tidak menyimpan timestamp, tampilkan urutan apa adanya.
-      return [...comments];
-    } else if (sortType === "positif") {
-      return [...comments].filter((c) => c.sentiment === "positif");
-    } else if (sortType === "negatif") {
-      return [...comments].filter((c) => c.sentiment === "negatif");
-    } else if (sortType === "netral") {
-      return [...comments].filter((c) => c.sentiment === "netral");
-    }
-    return comments;
+  const pieOptions = useMemo(
+    () => ({
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#111827",
+          padding: 10,
+          cornerRadius: 8,
+        },
+      },
+      cutout: "68%",
+    }),
+    []
+  );
+
+  const visibleComments = useMemo(() => {
+    if (sortType === "terbaru") return comments;
+    return comments.filter((comment) => comment.sentiment === sortType);
   }, [comments, sortType]);
 
   if (loading) {
-    return <div className="loading">Memuat detail video...</div>;
+    return (
+      <>
+        <header className="app-header">
+          <div className="app-header-inner">
+            <Link to="/" className="brand">
+              <span className="brand-mark" aria-hidden="true">
+                <FaSearch />
+              </span>
+              <span>Social Search</span>
+            </Link>
+          </div>
+        </header>
+        <main className="detail-page">
+          <div className="skeleton-card">
+            <div className="skeleton-line short" />
+            <div className="skeleton-line medium" />
+            <div className="skeleton-line" />
+          </div>
+        </main>
+      </>
+    );
   }
+
   if (!video) {
-    return <div className="error">Data video tidak ditemukan.</div>;
+    return (
+      <>
+        <header className="app-header">
+          <div className="app-header-inner">
+            <Link to="/" className="brand">
+              <span className="brand-mark" aria-hidden="true">
+                <FaSearch />
+              </span>
+              <span>Social Search</span>
+            </Link>
+          </div>
+        </header>
+        <main className="detail-page">
+          <div className="state-card">
+            <h3>Data video tidak ditemukan</h3>
+            <p>Video mungkin sudah dihapus atau tautannya tidak valid.</p>
+            <Link to="/" className="primary-button">
+              Kembali ke pencarian
+            </Link>
+          </div>
+        </main>
+      </>
+    );
   }
 
   return (
     <>
-      <header className="site-header">
-        <h1 className="site-title">Social Search🔍</h1>
+      <header className="app-header">
+        <div className="app-header-inner">
+          <Link to="/" className="brand">
+            <span className="brand-mark" aria-hidden="true">
+              <FaSearch />
+            </span>
+            <span>Social Search</span>
+          </Link>
+          <button type="button" className="ghost-link" onClick={() => navigate(-1)}>
+            <FaArrowLeft aria-hidden="true" /> Kembali ke hasil
+          </button>
+        </div>
       </header>
 
-      <div className="detail-container">
-        <div className="content">
-          <div className="header">
-            <button className="back-btn" onClick={() => navigate(-1)}>←</button>
-            <h2 className="nickname">{video.nickname || video.author}</h2>
-          </div>
+      <main className="detail-page">
+        <div className="detail-grid">
+          <section className="detail-primary">
+            <div className="detail-card">
+              <span className="eyebrow">DETAIL VIDEO</span>
+              <h1>@{video.nickname || video.author || "unknown"}</h1>
+              <p className="detail-desc">{video.desc}</p>
 
-          <p className="desc">{video.desc}</p>
-          <p><strong>Tanggal Upload:</strong> {video.tanggal_upload || "-"}</p>
-          <p><strong>Link Video:</strong> <a href={video.video_link} target="_blank" rel="noopener noreferrer">{video.video_link}</a></p>
-          <p><strong>Total Komentar:</strong> {total}</p>
-
-          <div className="sentiment-summary">
-            <p><strong>Ringkasan Sentimen:</strong></p>
-            <ul>
-              <li>Positif: {positif} ({percentPos}%)</li>
-              <li>Negatif: {negatif} ({percentNeg}%)</li>
-              <li>Netral: {netral} ({percentNet}%)</li>
-            </ul>
-          </div>
-
-          <div className="pie-chart-box">
-            <Pie data={pieData} options={{ maintainAspectRatio: false }} />
-          </div>
-
-          <div className="sort-options">
-            <label htmlFor="sort">Urutkan Komentar: </label>
-            <select id="sort" value={sortType} onChange={(e) => setSortType(e.target.value)}>
-              <option value="terbaru">Semua Komentar</option>
-              <option value="positif">Sentimen Positif</option>
-              <option value="negatif">Sentimen Negatif</option>
-              <option value="netral">Sentimen Netral</option>
-            </select>
-          </div>
-
-          <h3>Komentar Lengkap</h3>
-          <div className="comment-box">
-            {sortedComments.length === 0 ? (
-              <div className="comment-item netral" style={{ color: "#888" }}>
-                komentar kosong / komentar tidak termuat
+              <div className="meta-row">
+                <span>
+                  <FaCalendarAlt aria-hidden="true" /> {video.tanggal_upload || "Tanggal tidak tersedia"}
+                </span>
+                <span>
+                  <FaCommentDots aria-hidden="true" /> {total} komentar
+                </span>
               </div>
-            ) : (
-              sortedComments.map((c, i) => (
-                <div key={i} className={`comment-item ${c.sentiment}`}>
-                  <span className={`sentiment-label ${c.sentiment}`}>
-                    {c.sentiment.toUpperCase()}
-                  </span>
-                  <p>{c.text}</p>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
 
-      <footer className="site-footer">
-        <p>© 2025 Social Search</p>
-      </footer>
+              <a
+                className="video-link"
+                href={video.video_link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Buka di TikTok <FaExternalLinkAlt aria-hidden="true" />
+              </a>
+            </div>
+
+            <div className="detail-card">
+              <div className="comments-head">
+                <div>
+                  <span className="eyebrow">KOMENTAR</span>
+                  <h2>Analisis lengkap</h2>
+                </div>
+                <span className="comments-count">{visibleComments.length} ditampilkan</span>
+              </div>
+
+              <div className="filter-pills" role="group" aria-label="Filter sentimen komentar">
+                {FILTERS.map((filter) => (
+                  <button
+                    type="button"
+                    key={filter.value}
+                    className={sortType === filter.value ? "active" : ""}
+                    aria-pressed={sortType === filter.value}
+                    onClick={() => setSortType(filter.value)}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+
+              {visibleComments.length === 0 ? (
+                <p className="muted">Tidak ada komentar pada filter ini.</p>
+              ) : (
+                <div className="comment-list">
+                  {visibleComments.map((comment, index) => (
+                    <div key={index} className={`comment-item ${comment.sentiment}`}>
+                      <span className={`dot ${comment.sentiment}`} aria-hidden="true" />
+                      <p>{comment.text}</p>
+                      <span className={`comment-tag ${comment.sentiment}`}>
+                        {comment.sentiment}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <aside className="detail-side">
+            <div className="detail-card summary-card">
+              <span className="eyebrow">RINGKASAN</span>
+              <h2>Sentimen audiens</h2>
+
+              <div className="pie-wrap">
+                <Pie data={pieData} options={pieOptions} />
+                <div className="pie-center">
+                  <strong>{total}</strong>
+                  <span>komentar</span>
+                </div>
+              </div>
+
+              <div className={`dominant-badge ${dominant}`}>
+                Dominan: <strong>{dominant}</strong>
+              </div>
+
+              <ul className="summary-legend">
+                <li>
+                  <span className="dot positif" aria-hidden="true" />
+                  Positif
+                  <b>
+                    {positif} ({percentPos}%)
+                  </b>
+                </li>
+                <li>
+                  <span className="dot negatif" aria-hidden="true" />
+                  Negatif
+                  <b>
+                    {negatif} ({percentNeg}%)
+                  </b>
+                </li>
+                <li>
+                  <span className="dot netral" aria-hidden="true" />
+                  Netral
+                  <b>
+                    {netral} ({percentNet}%)
+                  </b>
+                </li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </main>
     </>
   );
 }

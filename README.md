@@ -14,6 +14,9 @@ dan disusun ulang agar siap dipakai sebagai portofolio.
 | Hasil & ringkasan sentimen | ![Halaman hasil](Screenshot/Screenshot_1.png) |
 | Detail + grafik pie | ![Halaman detail](Screenshot/Screenshot_3.png) |
 
+> Screenshot tersebut adalah dokumentasi tampilan awal. Antarmuka terbaru
+> menggunakan desain minimalis dan tidak menampilkan informasi cuaca.
+
 ## Fitur utama
 
 - Scraping TikTok via Selenium dengan **beberapa selector cadangan** dan scroll
@@ -24,6 +27,7 @@ dan disusun ulang agar siap dipakai sebagai portofolio.
   polling, dengan deduplikasi job untuk keyword yang sama.
 - MongoDB dengan **upsert** agar tidak ada duplikat saat scraping ulang.
 - REST API FastAPI + dokumentasi interaktif di `/docs`.
+- UI minimalis dan responsif dengan state loading, kosong, dan error yang jelas.
 - Unit & API test, CI GitHub Actions, dan Dockerfile + Docker Compose.
 
 ## Tech stack
@@ -111,8 +115,6 @@ npm run dev
 | `DB_NAME` | `new_tiktok_db` | Nama database |
 | `COLLECTION_NAME` | `videos` | Nama koleksi |
 | `CORS_ORIGINS` | `http://localhost:5173` | Origin yang diizinkan |
-| `OPENWEATHER_API_KEY` | kosong | API key cuaca (disimpan di backend) |
-| `OPENWEATHER_CITY` | `Banyuwangi` | Kota cuaca |
 | `TIKTOK_COOKIES_JSON` | kosong | Cookie TikTok sebagai JSON array |
 | `TIKTOK_COOKIES_FILE` | `backend/app/cookies.json` | File cookie lokal |
 | `USE_KBBI_LEXICON` | `0` | `1` untuk leksikon tambahan dari KBBI |
@@ -126,7 +128,6 @@ npm run dev
 | Method | Endpoint | Deskripsi |
 |---|---|---|
 | `GET` | `/` | Health check |
-| `GET` | `/weather?city=...` | Suhu saat ini (proxy OpenWeatherMap) |
 | `POST` | `/search?keyword=...` | Mulai job scraping, mengembalikan `job_id` |
 | `GET` | `/search/status/{job_id}` | Status job: `pending`/`running`/`done`/`failed` |
 | `GET` | `/search?keyword=...` | Endpoint lama (blocking, kompatibilitas) |
@@ -175,7 +176,7 @@ sentimen**, jadi tidak dapat dipakai untuk training supervised. Skrip
 
 ```bash
 cd backend
-python -m pytest        # 22 test: analisis, job, API
+python -m pytest        # 21 test: analisis, job, API
 ruff check app tests    # lint
 ```
 

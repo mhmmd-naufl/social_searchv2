@@ -18,9 +18,6 @@ COLLECTION_NAME = os.getenv("COLLECTION_NAME", "videos")
 _raw_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173")
 CORS_ORIGINS = [origin.strip() for origin in _raw_origins.split(",") if origin.strip()]
 
-OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
-OPENWEATHER_CITY = os.getenv("OPENWEATHER_CITY", "Banyuwangi")
-
 # Cookie TikTok: JSON string di env lebih diutamakan, fallback ke file lokal.
 COOKIES_JSON = os.getenv("TIKTOK_COOKIES_JSON", "")
 COOKIES_FILE = os.getenv(

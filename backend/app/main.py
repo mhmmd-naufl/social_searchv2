@@ -3,13 +3,12 @@
 import logging
 from contextlib import asynccontextmanager
 
-import requests
 from bson import ObjectId
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import jobs
-from .config import CORS_ORIGINS, OPENWEATHER_API_KEY, OPENWEATHER_CITY
+from .config import CORS_ORIGINS
 from .database import ensure_indexes, videos
 from .scrapper import search_video
 
@@ -71,28 +70,6 @@ def run_search_job(job_id: str, keyword: str) -> None:
 @app.get("/")
 def read_root():
     return {"message": "Social Search API"}
-
-
-@app.get("/weather")
-def get_weather(city: str = OPENWEATHER_CITY):
-    """Proxy cuaca agar API key tidak pernah dikirim ke browser."""
-    if not OPENWEATHER_API_KEY:
-        raise HTTPException(status_code=503, detail="OPENWEATHER_API_KEY belum dikonfigurasi.")
-
-    try:
-        response = requests.get(
-            "https://api.openweathermap.org/data/2.5/weather",
-            params={"q": city, "appid": OPENWEATHER_API_KEY, "units": "metric"},
-            timeout=10,
-        )
-        response.raise_for_status()
-        return {"status": "success", "temperature": response.json()["main"]["temp"]}
-    except requests.RequestException as exc:
-        logger.warning("Gagal memanggil OpenWeatherMap: %s", exc)
-        raise HTTPException(status_code=502, detail="Gagal mengambil data cuaca.") from exc
-    except (KeyError, ValueError) as exc:
-        logger.warning("Respons cuaca tidak terduga: %s", exc)
-        raise HTTPException(status_code=502, detail="Format data cuaca tidak valid.") from exc
 
 
 @app.post("/search")

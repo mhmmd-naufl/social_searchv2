@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { FaCalendarAlt, FaClock, FaTemperatureHigh, FaBars } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  FaSearch,
+  FaArrowRight,
+  FaHistory,
+  FaCalendarAlt,
+  FaClock,
+  FaTrash,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
@@ -9,21 +16,21 @@ function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [temp, setTemp] = useState("...");
   const [loading, setLoading] = useState(false);
+  const historyRef = useRef(null);
   const navigate = useNavigate();
 
-  // Update waktu dan tanggal
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      const options = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      };
-      setDate(now.toLocaleDateString("id-ID", options));
+      setDate(
+        now.toLocaleDateString("id-ID", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      );
       setTime(now.toLocaleTimeString("id-ID"));
     };
 
@@ -32,111 +39,158 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch suhu cuaca lewat backend agar API key tidak terekspos di browser
   useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-        const response = await fetch(`${apiUrl}/weather?city=Banyuwangi`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        setTemp(`${data.temperature.toFixed(1)}°C`);
-      } catch (error) {
-        console.error("Gagal mengambil suhu:", error);
-        setTemp("Gagal");
+    try {
+      const stored = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+      setHistory(Array.isArray(stored) ? stored : []);
+    } catch {
+      setHistory([]);
+    }
+  }, []);
+
+  // Tutup dropdown saat klik di luar area riwayat.
+  useEffect(() => {
+    if (!showHistory) return undefined;
+    const handleOutside = (event) => {
+      if (historyRef.current && !historyRef.current.contains(event.target)) {
+        setShowHistory(false);
       }
     };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [showHistory]);
 
-    fetchWeather();
-  }, []);
+  const runSearch = (value) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
 
-  // Ambil history dari localStorage
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("searchHistory") || "[]");
-    setHistory(stored);
-  }, []);
+    setLoading(true);
+    const updatedHistory = [trimmed, ...history.filter((item) => item !== trimmed)].slice(0, 5);
+    localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
+    setHistory(updatedHistory);
 
-  // Fungsi pencarian
-  const handleSearch = async () => {
-    if (keyword.trim()) {
-      setLoading(true);
-      const updatedHistory = [keyword, ...history.filter((k) => k !== keyword)].slice(0, 5);
-      localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
-      setHistory(updatedHistory);
+    sessionStorage.setItem("lastKeyword", trimmed);
+    setShowHistory(false);
+    navigate("/hasil");
+  };
 
-      // Simpan keyword ke sessionStorage agar bisa diakses di Hasil.js
-      sessionStorage.setItem("lastKeyword", keyword);
-
-      // Redirect ke halaman hasil
-      navigate("/hasil");
-      setLoading(false);
-    }
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    runSearch(keyword);
   };
 
   const handleHistoryClick = (item) => {
     setKeyword(item);
+    runSearch(item);
+  };
+
+  const clearHistory = () => {
+    localStorage.removeItem("searchHistory");
+    setHistory([]);
     setShowHistory(false);
   };
 
-  const toggleHistory = () => {
-    setShowHistory((prev) => !prev);
-  };
-
   return (
-    <>
-      <div className="main">
-        <div className="top-bar">
-          <div className="title">Social Search</div>
-          <div className="history-container">
-            <FaBars className="history-icon" onClick={toggleHistory} />
-            {showHistory && (
-              <div className="history-dropdown">
-                {history.length === 0 ? (
-                  <div className="history-item empty">Belum ada history</div>
-                ) : (
-                  history.map((item, idx) => (
-                    <div key={idx} className="history-item" onClick={() => handleHistoryClick(item)}>
-                      {item}
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
+    <div className="home">
+      <header className="home-header">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">
+            <FaSearch />
+          </span>
+          <span>Social Search</span>
         </div>
 
-        <div className="search-bar">
-          <div className="search-container"></div>
+        <div className="history-wrap" ref={historyRef}>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => setShowHistory((open) => !open)}
+            aria-label="Tampilkan riwayat pencarian"
+            aria-expanded={showHistory}
+          >
+            <FaHistory />
+          </button>
+
+          {showHistory && (
+            <div className="history-menu" role="dialog" aria-label="Riwayat pencarian">
+              <div className="history-menu-head">
+                <span>Pencarian terakhir</span>
+                {history.length > 0 && (
+                  <button type="button" className="text-button" onClick={clearHistory}>
+                    <FaTrash /> Hapus
+                  </button>
+                )}
+              </div>
+              {history.length === 0 ? (
+                <p className="history-empty">Belum ada riwayat.</p>
+              ) : (
+                <ul className="history-list">
+                  {history.map((item) => (
+                    <li key={item}>
+                      <button type="button" onClick={() => handleHistoryClick(item)}>
+                        <FaHistory aria-hidden="true" />
+                        <span>{item}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <main className="hero">
+        <span className="eyebrow">ANALISIS SENTIMEN KOMENTAR TIKTOK</span>
+        <h1>
+          Pahami audiens <span>dari setiap komentar.</span>
+        </h1>
+        <p className="hero-subtitle">
+          Cari kata kunci, lalu lihat ringkasan sentimen video TikTok dalam satu halaman.
+        </p>
+
+        <form className="search-form" onSubmit={handleSubmit}>
+          <FaSearch className="search-icon" aria-hidden="true" />
           <input
             type="text"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleSearch();
-              }
-            }}
-            placeholder="Cari konten TikTok"
-            className="search-input"
+            onChange={(event) => setKeyword(event.target.value)}
+            placeholder="Contoh: banyuwangi, tetangga, kominfo"
+            aria-label="Kata kunci pencarian"
+            autoComplete="off"
           />
-          <button onClick={handleSearch} className="search-button" disabled={loading}>
-            {loading ? "Loading..." : "Cari"}
+          <button type="submit" disabled={!keyword.trim() || loading}>
+            {loading ? "Mencari…" : "Cari"}
+            {!loading && <FaArrowRight aria-hidden="true" />}
           </button>
-        </div>
-      </div>
+        </form>
 
-      <div className="info-bar">
-        <div className="info-item">
-          <FaCalendarAlt className="icon" /> {date}
-        </div>
-        <div className="info-item">
-          <FaClock className="icon" /> {time}
-        </div>
-        <div className="info-item">
-          <FaTemperatureHigh className="icon" /> {temp}
-        </div>
-      </div>
-    </>
+        {history.length > 0 && (
+          <div className="recent-searches">
+            <span className="recent-label">Pencarian populer Anda</span>
+            <div className="recent-chips">
+              {history.slice(0, 4).map((item) => (
+                <button type="button" key={item} onClick={() => handleHistoryClick(item)}>
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      <footer className="home-footer">
+        <span>
+          <FaCalendarAlt aria-hidden="true" /> {date}
+        </span>
+        <span className="footer-dot" aria-hidden="true">
+          •
+        </span>
+        <span>
+          <FaClock aria-hidden="true" /> {time}
+        </span>
+      </footer>
+    </div>
   );
 }
 

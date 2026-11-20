@@ -67,9 +67,3 @@ def test_get_video_mengubah_objectid(monkeypatch):
     response = client.get("/video", params={"video_id": "v1"})
     assert response.status_code == 200
     assert isinstance(response.json()["data"][0]["_id"], str)
-
-
-def test_weather_tanpa_api_key(monkeypatch):
-    monkeypatch.setattr("app.main.OPENWEATHER_API_KEY", "")
-    response = client.get("/weather")
-    assert response.status_code == 503
