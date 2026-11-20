@@ -17,7 +17,7 @@ import {
 } from "react-icons/fa";
 import "./Detail.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/+$/, "");
 const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "1";
 
 Chart.register(ArcElement, Tooltip, Legend);
