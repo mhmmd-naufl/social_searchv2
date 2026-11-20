@@ -1,19 +1,19 @@
 import json
 import logging
-import time
 import random
+import time
 from urllib.parse import quote_plus
 
-from .analysis.analysis_comment import analyze_comments_from_data, lexicon
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 from .add_cookie import add_cookies_to_driver
 from .cookies import cookie
 from .save import save_to_mongo
 from .scrapper_comment import cek
 from .selenium_driver import setup_selenium_driver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 
 logger = logging.getLogger(__name__)
 
@@ -153,9 +153,10 @@ def search_video(keyword, max_scroll=3):
 
     finally:
         try:
-            driver.quit()
-        except:
-            pass
+            if driver is not None:
+                driver.quit()
+        except Exception as exc:
+            logger.warning("Gagal menutup driver: %s", exc)
 
     return final_result
     

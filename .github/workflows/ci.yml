@@ -20,6 +20,8 @@ jobs:
         run: pip install -r requirements-dev.txt
       - name: Download NLTK stopwords
         run: python -m nltk.downloader stopwords
+      - name: Lint
+        run: ruff check app tests
       - name: Run tests
         run: python -m pytest
 

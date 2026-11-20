@@ -58,6 +58,15 @@ def get_job(job_id: str) -> Optional[Job]:
         return _jobs.get(job_id)
 
 
+def get_active_job(keyword: str) -> Optional[Job]:
+    """Cari job pending/running untuk keyword yang sama (anti-duplikat)."""
+    with _lock:
+        for job in _jobs.values():
+            if job.keyword == keyword and job.status in {"pending", "running"}:
+                return job
+    return None
+
+
 def set_running(job_id: str) -> None:
     with _lock:
         if job_id in _jobs:

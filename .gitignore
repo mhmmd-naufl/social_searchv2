@@ -54,3 +54,15 @@ coverage/
 
 # Screenshot debug di seluruh project
 **/*screenshot*.png
+
+# Eksperimen / artefak lama yang sudah tidak dipakai
+Data_kata.txt
+hasil 12 video.txt
+backend/app/cekouterhtml.py
+backend/app/analysis/analysis_comment(json).py
+backend/app/analysis/csvjson.json
+backend/app/analysis/komen.csv
+backend/app/analysis/komentar_tiktok_sentimen_*.csv
+backend/app/analysis/komentar_tiktok_sentimen_output.json
+frontend/src/assets/react.svg
+frontend/public/vite.svg

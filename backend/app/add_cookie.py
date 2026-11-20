@@ -1,5 +1,6 @@
-import time
 import json
+import time
+
 
 def add_cookies_to_driver(driver, cookies_str):
     if not cookies_str:

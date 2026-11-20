@@ -108,6 +108,21 @@ LEXICON_EXTRA = _load_kbbi_extra() if USE_KBBI else {}
 # Leksikon buatan sendiri menang kalau ada kunci yang sama.
 LEXICON_NORMALIZED = _normalize({**LEXICON_EXTRA, **lexicon})
 
+# Sastrawi mengubah bentuk kata ("berhasil" -> "hasil"). Tanpa ini, token
+# hasil stemming tidak cocok lagi dengan kunci leksikon aslinya.
+for _key, _value in list(LEXICON_NORMALIZED.items()):
+    if "_" in _key or not _key.isalpha():
+        continue
+    _stemmed = STEMMER.stem(_key)
+    if _stemmed != _key and _stemmed not in LEXICON_NORMALIZED:
+        LEXICON_NORMALIZED[_stemmed] = _value
+
+# Frasa multi-kata harus dikenali SEBELUM stopword dibuang, kalau tidak
+# "luar biasa" hilang karena "luar" dan "biasa" termasuk stopword NLTK.
+MULTIWORD_KEYS = sorted(
+    (key for key in lexicon if " " in key), key=len, reverse=True
+)
+
 
 # --- 2. Pra-pemrosesan teks ---
 def preprocess_text(text):
@@ -118,6 +133,15 @@ def preprocess_text(text):
     emojis = EMOJI_RE.findall(text)
     text = EMOJI_RE.sub(" ", text)
     text = re.sub(r"[^a-zA-Z\s]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    # Tangkap frasa seperti "luar biasa" / "sakit hati" lebih dulu.
+    padded = f" {text} "
+    phrase_tokens = [
+        phrase.replace(" ", "_")
+        for phrase in MULTIWORD_KEYS
+        if f" {phrase} " in padded
+    ]
 
     tokens = []
     for word in text.split():
@@ -130,11 +154,11 @@ def preprocess_text(text):
             continue
         tokens.append(STEMMER.stem(word))
 
-    return tokens + emojis
+    return tokens + phrase_tokens + emojis
 
 
 def analyze_sentiment_lexicon(text_tokens, lexicon=None):
-    """Hitung skor sentimen, termasuk bigram dan kata negasi."""
+    """Hitung skor sentimen dari token, termasuk frasa dan kata negasi."""
     lex = _normalize(lexicon) if lexicon is not None else LEXICON_NORMALIZED
     score = 0
     negate_until = -1
@@ -144,15 +168,6 @@ def analyze_sentiment_lexicon(text_tokens, lexicon=None):
             negate_until = index + 3
             continue
         value = lex.get(token, 0)
-        if value and index <= negate_until:
-            value = -value
-        score += value
-
-    # Kata seperti "luar biasa" / "sakit hati" tidak terbaca per-token.
-    for index, (first, second) in enumerate(zip(text_tokens, text_tokens[1:])):
-        if first in NEGATIONS or second in NEGATIONS:
-            continue
-        value = lex.get(f"{first}_{second}", 0)
         if value and index <= negate_until:
             value = -value
         score += value

@@ -1,14 +1,14 @@
 """Ambil komentar dari halaman video lalu analisis sentimennya."""
 
-import time
 import random
+import time
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import (
     NoSuchElementException,
     StaleElementReferenceException,
 )
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 from .analysis.analysis_comment import analyze_comments_from_data, lexicon
 

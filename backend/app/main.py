@@ -105,9 +105,14 @@ def start_search(
     if not keyword:
         raise HTTPException(status_code=400, detail="Keyword is required")
 
+    # Hindari beberapa scraping bersamaan untuk keyword yang sama.
+    active = jobs.get_active_job(keyword)
+    if active is not None:
+        return {"status": "accepted", "job_id": active.id, "reused": True}
+
     job = jobs.create_job(keyword)
     background_tasks.add_task(run_search_job, job.id, keyword)
-    return {"status": "accepted", "job_id": job.id}
+    return {"status": "accepted", "job_id": job.id, "reused": False}
 
 
 @app.get("/search/status/{job_id}")

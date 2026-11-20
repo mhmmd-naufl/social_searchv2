@@ -1,21 +1,30 @@
 # Social Search
 
-Aplikasi untuk mencari konten TikTok berdasarkan kata kunci, mengambil komentar,
-lalu menganalisis sentimennya (positif / negatif / netral). Dibuat sebagai
-proyek magang semester.
+[![CI](https://github.com/mhmmd-naufl/social_searchv2/actions/workflows/ci.yml/badge.svg)](https://github.com/mhmmd-naufl/social_searchv2/actions/workflows/ci.yml)
 
-## Fitur
+Aplikasi pencarian konten TikTok yang mengambil komentar lalu menganalisis
+sentimennya (positif / negatif / netral). Dibuat sebagai proyek magang semester
+dan disusun ulang agar siap dipakai sebagai portofolio.
 
-- Pencarian video TikTok via Selenium, dengan beberapa selector cadangan.
-- Scroll otomatis pada halaman hasil dan pada daftar komentar.
-- Analisis sentimen berbasis leksikon bahasa Indonesia + normalisasi slang,
-  negasi, bigram, dan emoji.
-- Penyimpanan hasil ke MongoDB dengan **upsert** (tidak menumpuk duplikat).
-- Proses scraping dijalankan sebagai **job background**; frontend melakukan
-  polling agar tidak menunggu HTTP request berlama-lama.
-- UI React: halaman pencarian, daftar hasil dengan ringkasan sentimen, dan
-  halaman detail dengan grafik pie serta filter komentar.
-- Endpoint cuaca melalui proxy backend (API key tidak terekspos ke browser).
+## Tampilan
+
+| Halaman | Tampilan |
+|---|---|
+| Pencarian | ![Halaman pencarian](Screenshot/Screenshot_2.png) |
+| Hasil & ringkasan sentimen | ![Halaman hasil](Screenshot/Screenshot_1.png) |
+| Detail + grafik pie | ![Halaman detail](Screenshot/Screenshot_3.png) |
+
+## Fitur utama
+
+- Scraping TikTok via Selenium dengan **beberapa selector cadangan** dan scroll
+  otomatis pada hasil maupun daftar komentar.
+- Analisis sentimen leksikon bahasa Indonesia: normalisasi slang, penanganan
+  negasi, frasa multi-kata, dan emoji.
+- Pro scraping dijalankan sebagai **job background**; frontend melakukan
+  polling, dengan deduplikasi job untuk keyword yang sama.
+- MongoDB dengan **upsert** agar tidak ada duplikat saat scraping ulang.
+- REST API FastAPI + dokumentasi interaktif di `/docs`.
+- Unit & API test, CI GitHub Actions, dan Dockerfile + Docker Compose.
 
 ## Tech stack
 
@@ -25,7 +34,8 @@ proyek magang semester.
 | Backend | FastAPI, Uvicorn, Selenium, PyMongo |
 | Database | MongoDB |
 | Analisis | NLTK stopwords, Sastrawi stemmer, leksikon buatan sendiri |
-| Deployment | Docker Compose |
+| Kualitas | pytest, ruff, GitHub Actions, `npm audit` (0 vulnerability) |
+| Deployment | Docker, Docker Compose |
 
 ## Struktur folder
 
@@ -34,47 +44,57 @@ proyek magang semester.
 ├── backend/
 │   ├── app/
 │   │   ├── main.py              # endpoint FastAPI
-│   │   ├── config.py            # semua konfigurasi dari env
-│   │   ├── database.py          # koneksi Mongo singleton
-│   │   ├── jobs.py              # penyimpanan job background
+│   │   ├── config.py            # konfigurasi dari environment variable
+│   │   ├── database.py          # koneksi MongoDB singleton + index
+│   │   ├── jobs.py              # job background + deduplikasi
 │   │   ├── scrapper.py          # scraping halaman pencarian
 │   │   ├── scrapper_comment.py  # scraping komentar
 │   │   ├── save.py              # upsert ke MongoDB
-│   │   ├── selenium_driver.py   # inisialisasi browser
-│   │   ├── cookies.py           # loader cookie (bukan hardcode)
-│   │   └── analysis/            # leksikon, preprocessing, builder KBBI
-│   ├── tests/
+│   │   ├── selenium_driver.py   # browser Windows/Linux
+│   │   ├── cookies.py           # loader cookie (tanpa hardcode)
+│   │   └── analysis/            # leksikon, preprocessing, evaluator, KBBI
+│   ├── tests/                   # test analisis, job, dan API
 │   ├── requirements.txt
 │   └── requirements-dev.txt
 ├── frontend/src/
 │   ├── App.jsx      # halaman pencarian
 │   ├── Hasil.jsx    # hasil + polling job
 │   └── Detail.jsx   # detail video + grafik
+├── Screenshot/                  # dokumentasi UI
 ├── docker-compose.yml
-└── indonesian-adjective-sentiment-raw.csv   # kamus KBBI (tanpa label sentimen)
+└── indonesian-adjective-sentiment-raw.csv
 ```
 
-## Menjalankan secara lokal
+## Menjalankan proyek
 
-### 1. Backend
+### Opsi A — Docker Compose (paling mudah)
+
+```bash
+copy backend\.env.example backend\.env
+copy frontend\.env.example frontend\.env
+docker compose up --build
+```
+
+- Frontend: `http://localhost:5173`
+- API docs: `http://localhost:8000/docs`
+- MongoDB: `localhost:27017`
+
+### Opsi B — Lokal
+
+Backend:
 
 ```bash
 cd backend
 python -m venv .venv
-.venv\Scripts\activate          # Windows
+.venv\Scripts\activate
 pip install -r requirements-dev.txt
 python -m nltk.downloader stopwords
-
-copy .env.example .env          # lalu isi nilainya
+copy .env.example .env          # isi API key & cookie Anda
 cd ..
-uvicorn app.main:app --reload --app-dir backend --port 8000
+uvicorn app.main:app --app-dir backend --reload --port 8000
 ```
 
-Pastikan MongoDB berjalan di `localhost:27017`, chromedriver tersedia, dan
-cookie TikTok diletakkan di `backend/app/cookies.json` (atau di env
-`TIKTOK_COOKIES_JSON`).
-
-### 2. Frontend
+Frontend:
 
 ```bash
 cd frontend
@@ -83,41 +103,21 @@ copy .env.example .env
 npm run dev
 ```
 
-Buka `http://localhost:5173`.
-
-### 3. Menjalankan tes
-
-```bash
-cd backend
-python -m pytest
-```
-
-## Menjalankan dengan Docker
-
-```bash
-copy .env.example .env   # opsional: isi OPENWEATHER_API_KEY dll.
-docker compose up --build
-```
-
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:8000/docs`
-- MongoDB: `localhost:27017`
-
-## Konfigurasi (environment)
+## Konfigurasi
 
 | Variable | Default | Keterangan |
 |---|---|---|
 | `MONGO_URI` | `mongodb://localhost:27017` | Alamat MongoDB |
 | `DB_NAME` | `new_tiktok_db` | Nama database |
 | `COLLECTION_NAME` | `videos` | Nama koleksi |
-| `CORS_ORIGINS` | `http://localhost:5173` | Origin frontend yang diizinkan |
-| `OPENWEATHER_API_KEY` | kosong | API key cuaca (di backend saja) |
+| `CORS_ORIGINS` | `http://localhost:5173` | Origin yang diizinkan |
+| `OPENWEATHER_API_KEY` | kosong | API key cuaca (disimpan di backend) |
 | `OPENWEATHER_CITY` | `Banyuwangi` | Kota cuaca |
-| `TIKTOK_COOKIES_JSON` | kosong | Cookie TikTok berupa JSON array |
-| `TIKTOK_COOKIES_FILE` | `backend/app/cookies.json` | Path file cookie lokal |
-| `USE_KBBI_LEXICON` | `0` | `1` untuk memakai leksikon tambahan dari KBBI |
+| `TIKTOK_COOKIES_JSON` | kosong | Cookie TikTok sebagai JSON array |
+| `TIKTOK_COOKIES_FILE` | `backend/app/cookies.json` | File cookie lokal |
+| `USE_KBBI_LEXICON` | `0` | `1` untuk leksikon tambahan dari KBBI |
 | `CHROMEDRIVER_PATH` | otomatis | Path chromedriver |
-| `BROWSER_BINARY` | otomatis | Path browser (Brave/Chromium) |
+| `BROWSER_BINARY` | otomatis | Path Brave/Chromium |
 | `HEADLESS` | `0` | `1` untuk mode headless |
 | `VITE_API_URL` | `http://localhost:8000` | Base URL API (frontend) |
 
@@ -125,45 +125,72 @@ docker compose up --build
 
 | Method | Endpoint | Deskripsi |
 |---|---|---|
-| `GET` | `/` | Health check sederhana |
+| `GET` | `/` | Health check |
 | `GET` | `/weather?city=...` | Suhu saat ini (proxy OpenWeatherMap) |
 | `POST` | `/search?keyword=...` | Mulai job scraping, mengembalikan `job_id` |
-| `GET` | `/search/status/{job_id}` | Cek status job (`pending`/`running`/`done`/`failed`) |
+| `GET` | `/search/status/{job_id}` | Status job: `pending`/`running`/`done`/`failed` |
 | `GET` | `/search?keyword=...` | Endpoint lama (blocking, kompatibilitas) |
-| `GET` | `/video?video_id=...` | Ambil detail satu video |
+| `GET` | `/video?video_id=...` | Detail satu video |
+| `GET` | `/docs` | Dokumentasi interaktif Swagger |
 
-## Cara kerja analisis sentimen
+## Analisis sentimen
 
-1. Teks lowercase, emoji dipisahkan dan dipertahankan.
+Pipeline:
+
+1. Lowercase, emoji dipisahkan dan dipertahankan.
 2. Normalisasi slang (`gak` → `tidak`, `bgt` → `sangat`, dll.).
-3. Stopword dibuang, kata di-stem dengan Sastrawi. Kata negasi tetap disimpan.
-4. Skor dihitung dari leksikon, termasuk bigram (`luar biasa`, `sakit hati`).
-5. Kata negasi membalik skor token berikutnya dalam jendela 3 kata, sehingga
-   `"tidak suka"` berubah dari positif menjadi negatif.
-6. Skor > 0 → `positif`, < 0 → `negatif`, selebihnya → `netral`.
+3. Frasa multi-kata dikenali **sebelum** stopword dibuang, sehingga
+   `"luar biasa"` tidak hilang walaupun `luar`/`biasa` adalah stopword.
+4. Stopword dibuang, kata di-stem dengan Sastrawi; kata negasi tetap disimpan.
+5. Leksikon juga memuat varian hasil stemming (`berhasil` → `hasil`).
+6. Negasi membalik skor token berikutnya: `"tidak suka"` → negatif.
+7. Skor > 0 → `positif`, < 0 → `negatif`, selebihnya → `netral`.
+
+### Evaluasi
+
+```bash
+cd backend
+python -m app.analysis.evaluate
+```
+
+Contoh 36 komentar berlabel di `backend/tests/data/labeled_comments.json`
+digunakan untuk mendemonstrasikan metrik. Hasil saat ini:
+
+| Kelas | Precision | Recall | F1 | Support |
+|---|---|---|---|---|
+| positif | 1.000 | 1.000 | 1.000 | 12 |
+| negatif | 1.000 | 1.000 | 1.000 | 12 |
+| netral | 1.000 | 1.000 | 1.000 | 12 |
+
+**Accuracy: 100% (36/36).** Dataset ini sengaja dibuat kecil dan kuratif untuk
+menunjukkan cara kerja evaluasi — **bukan benchmark representatif**. Untuk
+pengukuran yang kredibel dibutuhkan ratusan komentar berlabel dari data nyata.
 
 File `indonesian-adjective-sentiment-raw.csv` adalah kamus KBBI **tanpa label
-sentimen**. Karena itu tidak bisa dipakai untuk training model supervised.
-Skrip `lexicon_builder.py` menggunakan definisinya untuk membangun leksikon
-tambahan (`lexicon_kbbi.json`) yang bisa diaktifkan dengan `USE_KBBI_LEXICON=1`.
-Untuk perbandingan dengan model ML, dibutuhkan dataset komentar berlabel yang
-belum tersedia di repository ini.
+sentimen**, jadi tidak dapat dipakai untuk training supervised. Skrip
+`lexicon_builder.py` memakai definisinya untuk membangun leksikon tambahan
+(`lexicon_kbbi.json`, opsional via `USE_KBBI_LEXICON=1`).
 
-## Catatan penting
+## Testing
 
-- Cookie TikTok bersifat sensitif dan cepat kedaluwarsa. Jangan pernah
-  meng-commit cookie atau API key. Keduanya sudah masuk ke `.gitignore`.
-- Riwayat git lama masih mengandung secret dari versi awal. Sebelum
-  mempublikasikan repository, lakukan rotasi kredensial dan pertimbangkan
-  `git filter-repo` untuk membersihkan history.
-- Scraping TikTok rentan berubah kapan saja (selector, captcha, login).
-  Aplikasi sudah punya fallback selector, tetapi tetap perlu pemeliharaan.
-- Job scraping disimpan in-memory. Data job hilang saat server restart;
-  gunakan Redis/Celery jika dibutuhkan untuk produksi.
+```bash
+cd backend
+python -m pytest        # 22 test: analisis, job, API
+ruff check app tests    # lint
+```
 
-## Status
+CI di `.github/workflows/ci.yml` menjalankan test backend dan build frontend
+pada setiap push.
 
-Proyek magang — dikembangkan bertahap:
-- Fase 1: keamanan kredensial, CORS, stabilitas dasar, upsert MongoDB.
-- Fase 2: fallback selector, scroll komentar, job background, perbaikan sentimen.
-- Fase 3: Docker, dokumentasi, unit test, CI.
+## Catatan
+
+- Cookie TikTok sensitif dan cepat kedaluwarsa. Jangan pernah meng-commit
+  cookie atau API key; keduanya sudah masuk `.gitignore`.
+- Riwayat git lama sudah dibersihkan dari secret dengan `git filter-repo`.
+  Tetap lakukan rotasi kredensial jika nilai lama pernah dipakai.
+- Scraping TikTok bergantung pada struktur halaman yang bisa berubah kapan
+  saja. Beberapa selector cadangan sudah disiapkan, tetapi tetap perlu
+  pemeliharaan.
+- Job disimpan in-memory; gunakan Redis/Celery untuk kebutuhan produksi.
+- Jika Anda memiliki clone lama dari repository ini, lakukan `git fetch` +
+  `git reset --hard origin/main` karena riwayat pernah di-rewrite.
