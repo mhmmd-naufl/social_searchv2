@@ -13,10 +13,12 @@ import {
   FaExternalLinkAlt,
   FaCalendarAlt,
   FaCommentDots,
+  FaInfoCircle,
 } from "react-icons/fa";
 import "./Detail.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "1";
 
 Chart.register(ArcElement, Tooltip, Legend);
 
@@ -171,6 +173,13 @@ function Detail() {
       </header>
 
       <main className="detail-page">
+        {DEMO_MODE && (
+          <p className="demo-note">
+            <FaInfoCircle aria-hidden="true" />
+            Mode demo — komentar berikut adalah contoh hasil scraping, bukan data real-time.
+          </p>
+        )}
+
         <div className="detail-grid">
           <section className="detail-primary">
             <div className="detail-card">

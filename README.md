@@ -6,6 +6,10 @@ Aplikasi pencarian konten TikTok yang mengambil komentar lalu menganalisis
 sentimennya (positif / negatif / netral). Dibuat sebagai proyek magang semester
 dan disusun ulang agar siap dipakai sebagai portofolio.
 
+**Dokumentasi tambahan:**
+- [Panduan deploy lengkap (Vercel + Fly.io + Atlas)](DEPLOYMENT.md)
+- [Catatan tentang data scraping & batasannya](DATA_NOTICE.md)
+
 ## Tampilan
 
 | Halaman | Tampilan |
@@ -152,7 +156,8 @@ fly deploy
 ### 4. Vercel (frontend)
 
 1. Import repo GitHub, **Root Directory = `frontend`**.
-2. Environment variable: `VITE_API_URL = https://<nama-app>.fly.dev`
+2. Environment variable: `VITE_API_URL = https://<nama-app>.fly.dev` dan
+   `VITE_DEMO_MODE = 1` (menampilkan catatan bahwa data adalah contoh).
 3. Deploy. `vercel.json` sudah menangani routing SPA (`/hasil`, `/detail/...`).
 4. Setelah URL Vercel didapat, perbarui secret Fly:
 
@@ -184,6 +189,7 @@ fly secrets set CORS_ORIGINS="https://<nama-app>.vercel.app"
 | `BROWSER_BINARY` | otomatis | Path Brave/Chromium |
 | `HEADLESS` | `0` | `1` untuk mode headless |
 | `VITE_API_URL` | `http://localhost:8000` | Base URL API (frontend) |
+| `VITE_DEMO_MODE` | `0` | `1` untuk banner "data contoh" di hasil & detail |
 
 ## API endpoint
 

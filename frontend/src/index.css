@@ -181,6 +181,20 @@ button:disabled {
   transform: translateY(-1px);
 }
 
+.demo-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .muted {
   color: var(--muted);
   font-size: 13px;

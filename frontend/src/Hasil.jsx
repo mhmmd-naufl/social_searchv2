@@ -7,10 +7,12 @@ import {
   FaExternalLinkAlt,
   FaExclamationCircle,
   FaInbox,
+  FaInfoCircle,
 } from "react-icons/fa";
 import "./Hasil.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "1";
 
 const summarize = (item) => {
   const comments = item.comment_analyzed || [];
@@ -148,6 +150,14 @@ const Hasil = () => {
               : `${results.length} video ditemukan`}
           </p>
         </div>
+
+        {DEMO_MODE && (
+          <p className="demo-note">
+            <FaInfoCircle aria-hidden="true" />
+            Mode demo — data yang ditampilkan adalah contoh hasil scraping, bukan hasil real-time.
+            Detail lengkap ada di <a href="https://github.com/mhmmd-naufl/social_searchv2/blob/main/DATA_NOTICE.md" target="_blank" rel="noopener noreferrer">DATA_NOTICE.md</a>.
+          </p>
+        )}
 
         {loading && (
           <div className="skeleton-list" aria-label="Memuat hasil">
