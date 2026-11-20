@@ -58,13 +58,19 @@ dan disusun ulang agar siap dipakai sebagai portofolio.
 │   │   ├── cookies.py           # loader cookie (tanpa hardcode)
 │   │   └── analysis/            # leksikon, preprocessing, evaluator, KBBI
 │   ├── tests/                   # test analisis, job, dan API
+│   ├── demo/sample_videos.json  # data contoh untuk mode demo
+│   ├── seed_demo.py             # seed data ke MongoDB Atlas
 │   ├── requirements.txt
 │   └── requirements-dev.txt
-├── frontend/src/
-│   ├── App.jsx      # halaman pencarian
-│   ├── Hasil.jsx    # hasil + polling job
-│   └── Detail.jsx   # detail video + grafik
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx      # halaman pencarian
+│   │   ├── Hasil.jsx    # hasil + polling job
+│   │   └── Detail.jsx   # detail video + grafik
+│   └── vercel.json              # routing SPA
 ├── Screenshot/                  # dokumentasi UI
+├── Dockerfile.fly
+├── fly.toml
 ├── docker-compose.yml
 └── indonesian-adjective-sentiment-raw.csv
 ```
@@ -93,7 +99,7 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements-dev.txt
 python -m nltk.downloader stopwords
-copy .env.example .env          # isi API key & cookie Anda
+copy .env.example .env          # isi MONGO_URI & cookie TikTok Anda
 cd ..
 uvicorn app.main:app --app-dir backend --reload --port 8000
 ```
@@ -106,6 +112,62 @@ npm install
 copy .env.example .env
 npm run dev
 ```
+
+## Deploy (Vercel + Fly.io + MongoDB Atlas)
+
+Frontend statis di Vercel, API berupa container di Fly.io, database di Atlas.
+
+### 1. MongoDB Atlas
+
+1. Buat cluster gratis (M0) dan database user.
+2. Di **Network Access**, tambahkan `0.0.0.0/0` (Fly.io tidak punya IP statis tetap).
+3. Salin connection string `mongodb+srv://...`.
+
+### 2. Seed data demo
+
+Data contoh ada di `backend/demo/sample_videos.json` (12 video + komentar).
+Jalankan dari folder `backend/`:
+
+```powershell
+$env:MONGO_URI="mongodb+srv://user:password@cluster..."
+python seed_demo.py
+```
+
+Tanpa seed, halaman hasil akan kosong karena scraping di cloud tidak dijamin
+berhasil (captcha / cookie kedaluwarsa).
+
+### 3. Fly.io (API)
+
+```bash
+fly auth login
+# edit fly.toml: ganti nilai `app` dengan nama unik Anda
+fly secrets set MONGO_URI="mongodb+srv://..." CORS_ORIGINS="https://<nama-app>.vercel.app"
+fly deploy
+```
+
+- `fly.toml` memakai `Dockerfile.fly` dengan port internal `8080`.
+- `CORS_ORIGINS` wajib berisi domain Vercel (pisahkan dengan koma jika lebih dari satu).
+- Setelah deploy, catat URL API: `https://<nama-app>.fly.dev`.
+
+### 4. Vercel (frontend)
+
+1. Import repo GitHub, **Root Directory = `frontend`**.
+2. Environment variable: `VITE_API_URL = https://<nama-app>.fly.dev`
+3. Deploy. `vercel.json` sudah menangani routing SPA (`/hasil`, `/detail/...`).
+4. Setelah URL Vercel didapat, perbarui secret Fly:
+
+```bash
+fly secrets set CORS_ORIGINS="https://<nama-app>.vercel.app"
+```
+
+### Catatan deploy
+
+- Scraping TikTok butuh Chrome + cookie yang masih valid; di cloud sering
+  terkena captcha atau halaman login. Mode demo memakai data seed agar
+  tampilan tetap lengkap.
+- `min_machines_running = 1` mencegah machine Fly tidur saat demo. Periksa
+  kuota/tagihan Fly.io sebelum mengaktifkannya.
+- Untuk produksi, pertimbangkan Redis/Celery dan rotasi cookie otomatis.
 
 ## Konfigurasi
 

@@ -1,0 +1,26 @@
+# Ganti nama app dengan nama unik Anda sebelum deploy.
+app = "social-search-api"
+
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile.fly"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[http_service.checks]]
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/"
+
+[env]
+  DB_NAME = "new_tiktok_db"
+  COLLECTION_NAME = "videos"
+  USE_KBBI_LEXICON = "0"
