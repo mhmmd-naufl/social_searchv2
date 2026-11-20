@@ -95,7 +95,14 @@ const Hasil = () => {
         );
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        if (!cancelled) await poll(data.job_id);
+        if (cancelled) return;
+
+        if (data.inline) {
+          setResults(Array.isArray(data.data) ? data.data : []);
+          setLoading(false);
+        } else {
+          await poll(data.job_id);
+        }
       } catch {
         if (!cancelled) {
           setError("Gagal mengambil data dari server.");

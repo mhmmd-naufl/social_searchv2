@@ -77,10 +77,23 @@ def start_search(
     background_tasks: BackgroundTasks,
     keyword: str = Query(..., min_length=1),
 ):
-    """Mulai job scraping dan langsung kembali dengan job_id."""
+    """Kembalikan data langsung bila tersedia, jika tidak mulai job scraping."""
     keyword = keyword.strip()
     if not keyword:
         raise HTTPException(status_code=400, detail="Keyword is required")
+
+    # Data dari DB/fallback langsung dikembalikan agar tidak bergantung
+    # pada job in-memory saat ada beberapa machine.
+    cached = find_documents({"keyword": keyword})
+    if cached:
+        return {
+            "status": "accepted",
+            "job_id": "inline",
+            "reused": False,
+            "inline": True,
+            "source": "cache",
+            "data": fix_objectid(cached),
+        }
 
     # Hindari beberapa scraping bersamaan untuk keyword yang sama.
     active = jobs.get_active_job(keyword)

@@ -35,13 +35,12 @@ def test_search_membuat_job_dan_mengembalikan_hasil(monkeypatch):
     assert body["status"] == "accepted"
     assert body["reused"] is False
 
-    status = client.get(f"/search/status/{body['job_id']}").json()
-    assert status["status"] == "done"
-    assert status["source"] == "cache"
-    assert status["data"][0]["video_id"] == "v1"
+    assert body["inline"] is True
+    assert body["data"][0]["video_id"] == "v1"
 
 
-def test_search_menggunakan_job_aktif_yang_sama():
+def test_search_menggunakan_job_aktif_yang_sama(monkeypatch):
+    monkeypatch.setattr("app.main.find_documents", lambda query: [])
     active = jobs.create_job("bwi")
 
     body = client.post("/search", params={"keyword": "bwi"}).json()

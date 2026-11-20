@@ -52,4 +52,9 @@ def find_documents(query):
         return list(videos.find(query))
     except Exception as exc:
         logger.warning("MongoDB tidak tersedia (%s). Memakai data contoh.", exc)
-        return _sample_documents(query)
+        matches = _sample_documents(query)
+        # Untuk pencarian keyword, tampilkan semua data contoh agar demo
+        # tetap bisa dipakai dengan kata kunci apa pun.
+        if not matches and "video_id" not in query:
+            matches = _sample_documents({})
+        return matches
