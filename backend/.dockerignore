@@ -1,0 +1,9 @@
+.env
+.env.*
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+app/*.png
+app/*.json
+app/__pycache__/

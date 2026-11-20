@@ -32,18 +32,15 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch suhu cuaca
+  // Fetch suhu cuaca lewat backend agar API key tidak terekspos di browser
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const city = "Banyuwangi";
-        const apiKey = "REDACTED";
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
-        );
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+        const response = await fetch(`${apiUrl}/weather?city=Banyuwangi`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        const temperature = data.main.temp;
-        setTemp(`${temperature.toFixed(1)}°C`);
+        setTemp(`${data.temperature.toFixed(1)}°C`);
       } catch (error) {
         console.error("Gagal mengambil suhu:", error);
         setTemp("Gagal");

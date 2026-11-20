@@ -1,27 +1,40 @@
 import json
-import bson
+import logging
 import time
 import random
-from analysis.analysis_comment import analyze_comments_from_data, lexicon
 from urllib.parse import quote_plus
-from cookies import cookie
-from selenium_driver import setup_selenium_driver
-from add_cookie import add_cookies_to_driver
-from save import save_to_mongo
-from scrapper_comment import cek
+
+from .analysis.analysis_comment import analyze_comments_from_data, lexicon
+from .add_cookie import add_cookies_to_driver
+from .cookies import cookie
+from .save import save_to_mongo
+from .scrapper_comment import cek
+from .selenium_driver import setup_selenium_driver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
 
-def search_video(keyword, max_scroll=0):
+logger = logging.getLogger(__name__)
+
+# TikTok sering mengganti atribut data-e2e. Coba beberapa selector berurutan.
+SEARCH_SELECTORS = [
+    'div[data-e2e="search_top-item"]',
+    'div[data-e2e="search-result-item"]',
+    'div[data-e2e="search-card"]',
+    'div[data-e2e="search-item"]',
+]
+
+
+def search_video(keyword, max_scroll=3):
     url = f"https://www.tiktok.com/search?q={quote_plus(keyword)}"
     cookies_str = cookie
     enable_scroll = True
     scroll_delay = 3
-    css_selector = 'div[data-e2e="search_top-item"]'
+    css_selector = None
     video_details = []
-    
+    final_result = []
+
     driver = None
     try:
         driver = setup_selenium_driver()
@@ -30,14 +43,21 @@ def search_video(keyword, max_scroll=0):
         print(f"Mengunjungi URL: {url}")
         driver.get(url)
 
-        print(f"Menunggu elemen awal dengan selector: '{css_selector}' muncul...")
-        try:
-            WebDriverWait(driver, 30).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
-            )
-            print("Elemen awal ditemukan.")
-        except TimeoutException:
-            print("Peringatan: Elemen awal tidak ditemukan dalam batas waktu.")
+        print("Mencari selector hasil pencarian yang tersedia...")
+        for selector in SEARCH_SELECTORS:
+            try:
+                WebDriverWait(driver, 15).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+                )
+                css_selector = selector
+                print(f"Selector video ditemukan: {selector}")
+                break
+            except TimeoutException:
+                continue
+
+        if css_selector is None:
+            print("Peringatan: tidak ada selector yang cocok, pakai selector pertama.")
+            css_selector = SEARCH_SELECTORS[0]
 
         if enable_scroll:
             print("\nMode scroll diaktifkan. Melakukan scroll untuk memuat konten...")
@@ -123,8 +143,13 @@ def search_video(keyword, max_scroll=0):
         print(f"Kesalahan WebDriver: {e}. Pastikan chromedriver.exe ada di PATH dan versi Chrome Anda kompatibel.")
     except Exception as e:
         print(f"Terjadi kesalahan tak terduga: {e}")
-        driver.save_screenshot("error_screenshot_page.png")
-        print("Screenshot error disimpan sebagai 'error_screenshot_page.png'.")
+        # driver bisa saja None bila setup gagal → jangan menimpa error asli.
+        if driver is not None:
+            try:
+                driver.save_screenshot("error_screenshot_page.png")
+                print("Screenshot error disimpan sebagai 'error_screenshot_page.png'.")
+            except Exception as screenshot_error:
+                logger.warning("Gagal menyimpan screenshot: %s", screenshot_error)
 
     finally:
         try:

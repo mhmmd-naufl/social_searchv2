@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Hasil.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 const Hasil = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,21 +15,61 @@ const Hasil = () => {
     const lastKeyword = sessionStorage.getItem("lastKeyword") || "";
     setKeyword(lastKeyword);
 
-    if (lastKeyword) {
-      setLoading(true);
-      fetch(`http://localhost:8000/search?keyword=${encodeURIComponent(lastKeyword)}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setResults(Array.isArray(data.data) ? data.data : []);
+    if (!lastKeyword) {
+      setLoading(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    let timer;
+
+    const poll = async (jobId) => {
+      try {
+        const res = await fetch(`${API_URL}/search/status/${jobId}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const job = await res.json();
+        if (cancelled) return;
+
+        if (job.status === "done") {
+          setResults(Array.isArray(job.data) ? job.data : []);
           setLoading(false);
-        })
-        .catch(() => {
+        } else if (job.status === "failed") {
+          setError(job.error || "Scraping gagal.");
+          setLoading(false);
+        } else {
+          timer = setTimeout(() => poll(jobId), 1500);
+        }
+      } catch {
+        if (!cancelled) {
           setError("Gagal mengambil data dari server.");
           setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
+        }
+      }
+    };
+
+    const start = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `${API_URL}/search?keyword=${encodeURIComponent(lastKeyword)}`,
+          { method: "POST" }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!cancelled) await poll(data.job_id);
+      } catch {
+        if (!cancelled) {
+          setError("Gagal mengambil data dari server.");
+          setLoading(false);
+        }
+      }
+    };
+
+    start();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, []);
 
   // Fungsi untuk ke halaman detail
@@ -45,7 +87,7 @@ const Hasil = () => {
       </header>
 
       <div className="container">
-        {loading && <p className="loading">Sedang mencari data...</p>}
+        {loading && <p className="loading">Sedang mencari data... proses ini bisa memakan waktu beberapa menit.</p>}
         {error && <p className="error">{error}</p>}
 
         {!loading && results.length === 0 && (

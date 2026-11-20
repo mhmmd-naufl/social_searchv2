@@ -4,8 +4,8 @@ import json
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium_driver import setup_selenium_driver
-from add_cookie import add_cookies_to_driver
-from cookies import cookie as cookies_str
+from .add_cookie import add_cookies_to_driver
+from .cookies import cookie as cookies_str
 
 def random_delay(a=1, b=3):
     time.sleep(random.uniform(a, b))

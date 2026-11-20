@@ -1,16 +1,29 @@
-from pymongo import MongoClient
+"""Simpan hasil scraping ke MongoDB.
+
+Gunakan upsert agar keyword/video yang sama tidak menumpuk sebagai duplikat
+setiap kali scraping dijalankan ulang.
+"""
+
+import logging
+from datetime import datetime, timezone
+
+from .database import videos
+
+logger = logging.getLogger(__name__)
+
 
 def save_to_mongo(data):
-    db_name="new_tiktok_db"
-    mongo_uri="mongodb://localhost:27017"
-    collection_name="videos"
     try:
-        client = MongoClient(mongo_uri)
-        db = client[db_name]
-        collection = db[collection_name]
-        collection.insert_one(data)
-        print("Data berhasil disimpan ke MongoDB.")
-    except Exception as e:
-        print(f"Error saat menyimpan ke MongoDB: {e}")
-    finally:
-        client.close()
+        payload = dict(data)
+        payload["scraped_at"] = datetime.now(timezone.utc)
+
+        videos.update_one(
+            {"video_id": payload.get("video_id")},
+            {"$set": payload},
+            upsert=True,
+        )
+        logger.info("Video %s berhasil disimpan.", payload.get("video_id"))
+        return True
+    except Exception as exc:
+        logger.exception("Gagal menyimpan ke MongoDB: %s", exc)
+        return False

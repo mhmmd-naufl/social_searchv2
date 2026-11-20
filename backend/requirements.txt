@@ -1,9 +1,8 @@
-fastapi
-uvicorn
-pymongo
-selenium
-requests
-nltk
-sastrawi
-
-python-dotenv
+fastapi>=0.110,<1
+uvicorn>=0.27,<1
+pymongo>=4.6,<5
+selenium>=4.6,<5
+requests>=2.31,<3
+nltk>=3.8,<4
+Sastrawi>=1.0,<2
+python-dotenv>=1.0,<2

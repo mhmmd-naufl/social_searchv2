@@ -4,6 +4,8 @@ import { Pie } from "react-chartjs-2";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 import "./Detail.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 Chart.register(ArcElement, Tooltip, Legend);
 
 function Detail() {
@@ -16,8 +18,11 @@ function Detail() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:8000/video?video_id=${video_id}`)
-      .then((res) => res.json())
+    fetch(`${API_URL}/video?video_id=${video_id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
         setVideo(Array.isArray(data.data) ? data.data[0] : data.data);
         setLoading(false);
@@ -55,7 +60,8 @@ function Detail() {
 
   const sortedComments = useMemo(() => {
     if (sortType === "terbaru") {
-      return [...comments].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      // Data komentar tidak menyimpan timestamp, tampilkan urutan apa adanya.
+      return [...comments];
     } else if (sortType === "positif") {
       return [...comments].filter((c) => c.sentiment === "positif");
     } else if (sortType === "negatif") {

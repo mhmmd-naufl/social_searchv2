@@ -24,3 +24,33 @@ Thumbs.db
 # Test/report/output
 *.sqlite3
 *.db
+
+# Lokal secrets & hasil scraping (jangan di-commit)
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+backend/app/cookies.json
+backend/app/*screenshot*.png
+backend/app/awal_banget.png
+backend/app/results.json
+backend/app/final_results.json
+backend/app/comments_result.json
+
+# Build & tool cache
+node_modules/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+coverage/
+*.tsbuildinfo
+
+# Screenshot debug di seluruh project
+**/*screenshot*.png
