@@ -46,6 +46,7 @@ const Hasil = () => {
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
   const [error, setError] = useState(null);
+  const [keywordFound, setKeywordFound] = useState(true);
   const [attempt, setAttempt] = useState(0);
   const navigate = useNavigate();
 
@@ -53,6 +54,7 @@ const Hasil = () => {
     const lastKeyword = sessionStorage.getItem("lastKeyword") || "";
     setKeyword(lastKeyword);
     setError(null);
+    setKeywordFound(true);
 
     if (!lastKeyword) {
       setLoading(false);
@@ -71,6 +73,7 @@ const Hasil = () => {
 
         if (job.status === "done") {
           setResults(Array.isArray(job.data) ? job.data : []);
+          setKeywordFound(job.keyword_found !== false);
           setLoading(false);
         } else if (job.status === "failed") {
           setError(job.error || "Scraping gagal. Silakan coba lagi.");
@@ -99,6 +102,7 @@ const Hasil = () => {
 
         if (data.inline) {
           setResults(Array.isArray(data.data) ? data.data : []);
+          setKeywordFound(data.keyword_found !== false);
           setLoading(false);
         } else {
           await poll(data.job_id);
@@ -163,6 +167,14 @@ const Hasil = () => {
             <FaInfoCircle aria-hidden="true" />
             Mode demo — data yang ditampilkan adalah contoh hasil scraping, bukan hasil real-time.
             Detail lengkap ada di <a href="https://github.com/mhmmd-naufl/social_searchv2/blob/main/DATA_NOTICE.md" target="_blank" rel="noopener noreferrer">DATA_NOTICE.md</a>.
+          </p>
+        )}
+
+        {!loading && !error && !keywordFound && results.length > 0 && (
+          <p className="search-note" role="status">
+            <FaInfoCircle aria-hidden="true" />
+            Keyword <strong>“{keyword}”</strong> belum ada di database. Saat ini menampilkan
+            data contoh yang tersedia — coba kata kunci lain untuk hasil yang lebih spesifik.
           </p>
         )}
 

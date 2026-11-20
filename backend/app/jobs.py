@@ -21,6 +21,7 @@ class Job:
     keyword: str
     status: str = "pending"  # pending | running | done | failed
     source: str = ""
+    keyword_found: bool = True
     data: List[dict] = field(default_factory=list)
     error: Optional[str] = None
     created_at: float = field(default_factory=time.time)
@@ -31,6 +32,7 @@ class Job:
             "keyword": self.keyword,
             "status": self.status,
             "source": self.source,
+            "keyword_found": self.keyword_found,
             "data": self.data,
             "error": self.error,
         }
@@ -73,12 +75,13 @@ def set_running(job_id: str) -> None:
             _jobs[job_id].status = "running"
 
 
-def set_done(job_id: str, data: list, source: str = "") -> None:
+def set_done(job_id: str, data: list, source: str = "", keyword_found: bool = True) -> None:
     with _lock:
         if job_id in _jobs:
             _jobs[job_id].status = "done"
             _jobs[job_id].data = data
             _jobs[job_id].source = source
+            _jobs[job_id].keyword_found = keyword_found
 
 
 def set_failed(job_id: str, error: str) -> None:

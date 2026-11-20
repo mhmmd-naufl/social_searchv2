@@ -46,5 +46,13 @@ def test_job_aktif_ditemukan_hanya_sebelum_selesai():
 def test_to_dict():
     job = jobs.create_job("bwi")
     data = job.to_dict()
-    assert set(data) == {"job_id", "keyword", "status", "source", "data", "error"}
+    assert set(data) == {
+        "job_id",
+        "keyword",
+        "status",
+        "source",
+        "keyword_found",
+        "data",
+        "error",
+    }
     assert data["job_id"] == job.id

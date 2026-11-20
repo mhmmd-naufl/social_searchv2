@@ -61,7 +61,8 @@ def run_search_job(job_id: str, keyword: str) -> None:
             if not result:
                 raise RuntimeError("Tidak ada data ditemukan untuk keyword ini.")
             data, source = fix_objectid(result), "scraper"
-        jobs.set_done(job_id, data, source)
+        keyword_found = any(item.get("keyword") == keyword for item in data)
+        jobs.set_done(job_id, data, source, keyword_found=keyword_found)
     except Exception as exc:
         logger.exception("Job %s gagal untuk keyword %r", job_id, keyword)
         jobs.set_failed(job_id, str(exc))
@@ -92,6 +93,7 @@ def start_search(
             "reused": False,
             "inline": True,
             "source": "cache",
+            "keyword_found": any(item.get("keyword") == keyword for item in cached),
             "data": fix_objectid(cached),
         }
 
